@@ -26,3 +26,4 @@ skillmimic/data/models/*
 
 skillmimic/env/tasks/ase.py
 skillmimic/env/tasks/hrl_circling.BAK.py
+skillmimic/env/tasks/skillmimic.BAK.py

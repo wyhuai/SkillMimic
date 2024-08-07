@@ -14,16 +14,18 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": ["--task", "SkillMimicBallPlay", "--num_envs", "512",
+                "--episode_length", "60",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", //#projectname
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
-                "--rl_device", "cuda:0",
-                "--sim_device", "cuda:0",
-                "--pipeline", "gpu",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
                 // "~/Downloads/BallPlay-M_0712/run", //"physhoi/data/motions/test", //"physhoi/data/motions/ballplay_large/pick_cls",
                 "--headless",
             ],
             "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
                 // "LD_LIBRARY_PATH": "/project/t3_hwtsui/miniconda3/envs/rlgpu/lib",
                 // "PATH": "/project/t3_hwtsui/miniconda3/envs/rlgpu/bin/ninja:/project/t3_hwtsui/miniconda3/envs/rlgpu/bin/:${env:PATH}",
                 "CUDA_VISIBLE_DEVICES": "0"
@@ -116,7 +118,7 @@
                 // "--test",
                 "--task", "HRLHookshot", "--num_envs", "512",
                 "--episode_length", "800",
-                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
@@ -139,7 +141,7 @@
                 "--task", "HRLScoringLayup", "--num_envs", "512",
                 "--episode_length", "800",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
-                "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
@@ -150,7 +152,7 @@
             }
         },
         {
-            "name": "Training PPO Circling",
+            "name": "Training PPO HookShot",
             "type": "python",
             "request": "launch",
             "program": "skillmimic/run.py",
@@ -158,9 +160,9 @@
             "justMyCode": false,
             "args": [
                 // "--test",
-                "--task", "HRLCircling", "--num_envs", "512",
+                "--task", "HRLHookshot", "--num_envs", "512",
                 "--episode_length", "800",
-                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 

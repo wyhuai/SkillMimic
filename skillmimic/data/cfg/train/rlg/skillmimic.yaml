@@ -70,3 +70,5 @@ params:
     bounds_loss_coef: 10
     enable_eps_greedy: False #Z0 ase中这一项是True
     resume_from: None
+
+    # device: "cpu" #ZT9

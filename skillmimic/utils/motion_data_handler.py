@@ -7,7 +7,7 @@ import re
 from utils import torch_utils
 
 class MotionDataHandler:
-    def __init__(self, motion_file, device, key_body_ids, cfg, num_envs, max_episode_length, init_vel=False, play_dataset=False):
+    def __init__(self, motion_file, device, key_body_ids, cfg, num_envs, max_episode_length, reward_weights_default, init_vel=False, play_dataset=False):
         self.device = device
         self._key_body_ids = key_body_ids
         self.cfg = cfg
@@ -23,6 +23,20 @@ class MotionDataHandler:
         self.max_episode_length = max_episode_length
         self.envid2motid = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
         self.envid2episode_lengths = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+
+        self.reward_weights_default = reward_weights_default
+        self.reward_weights = {}
+        self.reward_weights["p"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["p"])
+        self.reward_weights["r"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["r"])
+        self.reward_weights["op"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["op"])
+        self.reward_weights["ig"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["ig"])
+        self.reward_weights["cg1"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["cg1"])
+        self.reward_weights["cg2"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["cg2"])
+        self.reward_weights["pv"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["pv"])
+        self.reward_weights["rv"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["rv"])
+        self.reward_weights["or"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["or"])
+        self.reward_weights["opv"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["opv"])
+        self.reward_weights["orv"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["orv"])
 
     def load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1]
@@ -157,7 +171,7 @@ class MotionDataHandler:
         return motion_times
 
 
-    def get_initial_state(self, env_ids, motion_ids, start_frames, reward_weights_default):
+    def get_initial_state(self, env_ids, motion_ids, start_frames):
         """
         获取给定 motion_ids 和 start_frames 的初始状态。
         
@@ -175,7 +189,7 @@ class MotionDataHandler:
         self.envid2episode_lengths[env_ids] = torch.where(valid_lengths < self.max_episode_length,
                                     valid_lengths, self.max_episode_length)
 
-        reward_weights_list = []
+        # reward_weights_list = []
         hoi_data_list = []
         root_pos_list = []
         root_rot_list = []
@@ -196,11 +210,13 @@ class MotionDataHandler:
             episode_length = self.envid2episode_lengths[env_id].item()
 
             if self.hoi_data_dict[motion_id]['hoi_data_text'] == '000':
-                state = self._get_special_case_initial_state(motion_id, start_frame, episode_length, reward_weights_default)
+                state = self._get_special_case_initial_state(motion_id, start_frame, episode_length)
             else:
-                state = self._get_general_case_initial_state(motion_id, start_frame, episode_length, reward_weights_default)
+                state = self._get_general_case_initial_state(motion_id, start_frame, episode_length)
 
-            reward_weights_list.append(state['reward_weights'])
+            # reward_weights_list.append(state['reward_weights'])
+            for k in self.reward_weights_default:
+                self.reward_weights[k][env_id] =  torch.tensor(state['reward_weights'][k], dtype=torch.float32, device=self.device)
             hoi_data_list.append(state["hoi_data"])
             root_pos_list.append(state['init_root_pos'])
             root_rot_list.append(state['init_root_rot'])
@@ -214,10 +230,7 @@ class MotionDataHandler:
             obj_rot_vel_list.append(state["init_obj_rot_vel"])
             
         # 将列表转换为张量
-        reward_weights = {
-            k: torch.stack([torch.tensor(rw[k], dtype=torch.float32, device=self.device) if not torch.is_tensor(rw[k]) else rw[k] for rw in reward_weights_list], dim=0)
-            for k in reward_weights_default
-        }
+
         hoi_data = torch.stack(hoi_data_list, dim=0)
         root_pos = torch.stack(root_pos_list, dim=0)
         root_rot = torch.stack(root_rot_list, dim=0)
@@ -230,19 +243,19 @@ class MotionDataHandler:
         obj_rot = torch.stack(obj_rot_list, dim =0)
         obj_rot_vel = torch.stack(obj_rot_vel_list, dim =0)
 
-        return reward_weights, hoi_data, \
+        return hoi_data, \
                 root_pos, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, \
                 obj_pos, obj_pos_vel, obj_rot, obj_rot_vel
                 
 
-    def _get_special_case_initial_state(self, motion_id, start_frame, episode_length, reward_weights_default):
+    def _get_special_case_initial_state(self, motion_id, start_frame, episode_length):
         hoi_data = F.pad(
             self.hoi_data_dict[motion_id]['hoi_data'][start_frame:start_frame + episode_length],
             (0, 0, 0, self.max_episode_length - episode_length)
         )
 
         return {
-            "reward_weights": self._get_special_case_reward_weights(reward_weights_default),
+            "reward_weights": self._get_special_case_reward_weights(),
             "hoi_data": hoi_data,
             "init_root_pos": self.hoi_data_dict[motion_id]['root_pos'][start_frame, :],
             "init_root_rot": self.hoi_data_dict[motion_id]['root_rot'][start_frame, :],
@@ -256,14 +269,14 @@ class MotionDataHandler:
             "init_obj_rot_vel": torch.rand(4, device=self.device) * 0.1
         }
 
-    def _get_general_case_initial_state(self, motion_id, start_frame, episode_length, reward_weights_default):
+    def _get_general_case_initial_state(self, motion_id, start_frame, episode_length):
         hoi_data = F.pad(
             self.hoi_data_dict[motion_id]['hoi_data'][start_frame:start_frame + episode_length],
             (0, 0, 0, self.max_episode_length - episode_length)
         )
 
         return {
-            "reward_weights": self._get_general_case_reward_weights(reward_weights_default),
+            "reward_weights": self._get_general_case_reward_weights(),
             "hoi_data": hoi_data,
             "init_root_pos": self.hoi_data_dict[motion_id]['root_pos'][start_frame, :],
             "init_root_rot": self.hoi_data_dict[motion_id]['root_rot'][start_frame, :],
@@ -277,7 +290,8 @@ class MotionDataHandler:
             "init_obj_rot_vel": self.hoi_data_dict[motion_id]['obj_rot_vel'][start_frame, :]
         }
 
-    def _get_special_case_reward_weights(self, reward_weights):
+    def _get_special_case_reward_weights(self):
+        reward_weights = self.reward_weights_default
         return {
             "p": reward_weights["p"],
             "r": reward_weights["r"],
@@ -292,7 +306,8 @@ class MotionDataHandler:
             "orv": reward_weights["orv"],
         }
 
-    def _get_general_case_reward_weights(self, reward_weights):
+    def _get_general_case_reward_weights(self):
+        reward_weights = self.reward_weights_default
         return {
             "p": reward_weights["p"],
             "r": reward_weights["r"],

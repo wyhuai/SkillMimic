@@ -54,7 +54,7 @@ class HRLHookshot(HumanoidWholeBodyWithObject):
         state_init = cfg["env"]["stateInit"]
         self._state_init = HRLHookshot.StateInit[state_init]
         
-        # self._enable_task_obs = False #cfg["env"]["enableTaskObs"]
+        self._enable_task_obs = False #cfg["env"]["enableTaskObs"]
         
         # self.condition_size = 0
         self.goal_size = 0
@@ -96,6 +96,8 @@ class HRLHookshot(HumanoidWholeBodyWithObject):
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
         # self.max_episode_length = 800
+        if self.cfg["env"]["episodeLength"] > 0:
+            self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
         self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.init_vel)
 

@@ -48,17 +48,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.ref_hoi_obs_size = 323 + len(self.cfg["env"]["keyBodies"])*3 + 6 #V1
         
         self._load_motion(self.motion_file) #ZC1
-        
-        if self.cfg["env"]["episodeLength"] > 0:
-            self.max_episode_length =  self.cfg["env"]["episodeLength"]
-        
-        self.reward_weights = {}
-        self.reward_weights["p"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["p"])
-        self.reward_weights["r"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["r"])
-        self.reward_weights["op"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["op"])
-        self.reward_weights["ig"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["ig"])
-        self.reward_weights["cg1"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["cg1"])
-        self.reward_weights["cg2"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["cg2"])
 
         self._curr_ref_obs = torch.zeros((self.num_envs, self.ref_hoi_obs_size), device=self.device, dtype=torch.float)
         self._hist_ref_obs = torch.zeros((self.num_envs, self.ref_hoi_obs_size), device=self.device, dtype=torch.float)
@@ -166,7 +155,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                   self._contact_forces,
                                                   self._tar_contact_forces,
                                                   len(self._key_body_ids),
-                                                  self.reward_weights
+                                                  self._motion_data.reward_weights
                                                   )
         return
     
@@ -174,8 +163,10 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
         self.max_episode_length = 600 if self.skill_name in ['run'] else 400 #100 + 400 #ZC30
+        if self.cfg["env"]["episodeLength"] > 0:
+            self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
-        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.init_vel)
+        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.reward_weights_default, self.init_vel)
 
         return
     
@@ -257,11 +248,12 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = self._motion_data.sample_time(motion_ids)
 
-        self.reward_weights, self.hoi_data_batch, \
+        # self.reward_weights[env_ids], 
+        self.hoi_data_batch[env_ids], \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
         self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
         self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
-            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times, self.reward_weights_default)
+            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
         # if self.show_motion_test == False:
         #     print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \

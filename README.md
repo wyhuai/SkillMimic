@@ -1,5 +1,5 @@
 # SkillMimic
-📖[Paper](https://github.com/wyhuai/SkillMimic)|🖼️[Project Page](https://github.com/wyhuai/SkillMimic)
+[Paper](https://github.com/wyhuai/SkillMimic) | [Project Page](https://github.com/wyhuai/SkillMimic) | [Video](https://github.com/wyhuai/SkillMimic)
 
 Official code release for the following paper:
 "**SkillMimic: Learning Reusable Basketball Skills from Demonstrations**"

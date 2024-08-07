@@ -99,8 +99,10 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
         # self.max_episode_length = 800
+        if self.cfg["env"]["episodeLength"] > 0:
+            self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
-        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.init_vel)
+        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.reward_weights_default, self.init_vel)
 
         return
 
@@ -132,11 +134,11 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = self._motion_data.sample_time(motion_ids)
 
-        self.reward_weights, self.hoi_data_batch, \
+        _, \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
         self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
         self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
-            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times, self.reward_weights_default)
+            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
         # if self.show_motion_test == False:
         #     print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \

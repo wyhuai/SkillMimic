@@ -93,10 +93,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     def _update_hist_hoi_obs(self, env_ids=None):
         self._hist_obs = self._curr_obs.clone()
         return
-        
-    def _setup_character_props(self, key_bodies):
-        super()._setup_character_props(key_bodies)
-        return
 
     def get_obs_size(self):
         obs_size = super().get_obs_size()
@@ -197,17 +193,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         
         return
     
-    
-    
-    def _reset_env_tensors(self, env_ids):
-        super()._reset_env_tensors(env_ids)
-
-
-        env_ids_int32 = self._tar_actor_ids[env_ids]
-        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
-                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-    
-        return
 
     def _reset_envs(self, env_ids):
         # self._reset_default_env_ids = []

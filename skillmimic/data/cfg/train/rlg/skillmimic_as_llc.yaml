@@ -62,7 +62,7 @@ params:
     ppo: True
     e_clip: 0.2
     horizon_length: 32
-    minibatch_size: 16384 #64 #Z0 1
+    minibatch_size: 4096 #16384 #64 #Z0 1
     mini_epochs: 6
     critic_coef: 5
     clip_value: False

@@ -291,8 +291,8 @@ class HRLPlayerDiscrete(common_player_discrete.CommonPlayerDiscrete):
         llc_obs = self._extract_llc_obs(obs)
         print(actions)
         # actions += 1 #ZC0
-        # controlmapping = torch.tensor([31,1,2,12,13,11]).to("cuda")#{0:31, 1:1, 2:2, 3:12, 4:13, 5:11}
-        controlmapping = torch.tensor(self._control_mapping).to("cuda")
+        # controlmapping = torch.tensor([31,1,2,12,13,11]).to(self.device)#{0:31, 1:1, 2:2, 3:12, 4:13, 5:11}
+        controlmapping = torch.tensor(self._control_mapping).to(self.device)
         actions = controlmapping[actions]
         
         control_signal = torch.zeros((llc_obs.size(0),64), device=llc_obs.device)

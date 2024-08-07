@@ -225,6 +225,15 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
         self._target_states[env_ids, 10:13] = self.init_obj_rot_vel[env_ids]
         return
 
+    def _reset_env_tensors(self, env_ids):
+        super()._reset_env_tensors(env_ids)
+
+        env_ids_int32 = self._tar_actor_ids[env_ids]
+        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
+                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+    
+        return
+    
     def pre_physics_step(self, actions):
         super().pre_physics_step(actions)
         self.envts = list(self.gym.query_viewer_action_events(self.viewer))
@@ -421,10 +430,10 @@ def compute_obj_observations(root_states, tar_states):
     local_tar_rot_obs = torch_utils.quat_to_tan_norm(local_tar_rot)
 
     # for disturbance test
-    # local_tar_pos += torch.rand_like(local_tar_pos).to("cuda")*0.05
-    # local_tar_rot_obs += torch.rand_like(local_tar_rot_obs).to("cuda")*0.5
-    # local_tar_vel += torch.rand_like(local_tar_vel).to("cuda")*0.5
-    # local_tar_ang_vel += torch.rand_like(local_tar_ang_vel).to("cuda")*0.5
+    # local_tar_pos += torch.rand_like(local_tar_pos).to(self.device)*0.05
+    # local_tar_rot_obs += torch.rand_like(local_tar_rot_obs).to(self.device)*0.5
+    # local_tar_vel += torch.rand_like(local_tar_vel).to(self.device)*0.5
+    # local_tar_ang_vel += torch.rand_like(local_tar_ang_vel).to(self.device)*0.5
 
     obs = torch.cat([local_tar_pos, local_tar_rot_obs, local_tar_vel, local_tar_ang_vel], dim=-1)
     return obs

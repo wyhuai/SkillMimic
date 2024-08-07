@@ -207,8 +207,8 @@ class HRLAgentDiscrete(common_agent_discrete.CommonAgentDiscrete):
     def _compute_llc_action(self, obs, actions):
 
         # print(actions)
-        # controlmapping = torch.tensor([31,1,2,12,13,11]).to("cuda")#{0:31, 1:1, 2:2, 3:12, 4:13, 5:11}
-        controlmapping = torch.tensor(self._control_mapping).to("cuda")
+        # controlmapping = torch.tensor([31,1,2,12,13,11]).to(self.device)#{0:31, 1:1, 2:2, 3:12, 4:13, 5:11}
+        controlmapping = torch.tensor(self._control_mapping).to(self.device)
         actions = controlmapping[actions]
 
         llc_obs = self._extract_llc_obs(obs)

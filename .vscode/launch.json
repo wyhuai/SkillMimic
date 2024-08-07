@@ -72,10 +72,13 @@
             "justMyCode": false,
             "args": [
                 // "--test",
-                "--task", "HRLCircling", "--num_envs", "512",
+                "--task", "HRLCircling", "--num_envs", "256",
                 "--episode_length", "800",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml",
+                "--rl_device",  "cuda:0",//"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
@@ -96,6 +99,9 @@
                 // "--test",
                 "--task", "HRLHeadingEasy", "--num_envs", "512",
                 "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
@@ -118,6 +124,9 @@
                 // "--test",
                 "--task", "HRLHookshot", "--num_envs", "512",
                 "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
@@ -140,6 +149,9 @@
                 // "--test",
                 "--task", "HRLScoringLayup", "--num_envs", "512",
                 "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
@@ -162,6 +174,9 @@
                 // "--test",
                 "--task", "HRLHookshot", "--num_envs", "512",
                 "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt

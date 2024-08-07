@@ -5,7 +5,7 @@ Official code release for the following paper:
 "**SkillMimic: Learning Reusable Basketball Skills from Demonstrations**"
 
 ![image](https://github.com/user-attachments/assets/ac75c9be-f144-4b6d-980f-272c6f657627)
-We propose a novel approach that enables physically simulated humanoids to learn a variety of basketball skills from human demonstrations, such as
+We propose a novel approach that enables physically simulated humanoids to learn a variety of basketball skills purely from human demonstrations, such as
 shooting (blue), retrieving (red), and turnaround layup (yellow). Once acquired, these skills can be reused and combined to accomplish complex tasks, such as
 continuous scoring (green), which involves dribbling toward the basket, timing the dribble and layup to score, retrieving the rebound, and repeating the whole process.
 

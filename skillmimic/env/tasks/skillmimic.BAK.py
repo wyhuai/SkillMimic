@@ -9,7 +9,6 @@ from isaacgym import gymapi
 from isaacgym.torch_utils import *
 
 from utils import torch_utils
-from utils.motion_data_handler import MotionDataHandler
 
 from env.tasks.humanoid_object_task import HumanoidWholeBodyWithObject
 
@@ -35,8 +34,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.save_images = cfg['env']['saveImages']
         self.init_vel = cfg['env']['initVel']
         self.ball_size = cfg['env']['ballSize']
-
-        self.condition_size = 64
 
         super().__init__(cfg=cfg,
                          sim_params=sim_params,
@@ -68,13 +65,13 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         self.hoi_data_batch = torch.zeros([self.num_envs, self.max_episode_length, self.ref_hoi_obs_size], device=self.device, dtype=torch.float)
         
-        
+        self.condition_size = 64
         self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
 
         self._subscribe_events_for_change_condition()
 
         self.envid2motid = torch.zeros(self.num_envs, device=self.device, dtype=torch.long) #{}
-        # self.envid2episode_lengths = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        self.envid2episode_lengths = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
 
         self.show_motion_test = False
         # self.init_from_frame_test = 0 #2 #ZC3
@@ -92,9 +89,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self._update_condition()
 
         super().post_physics_step()
-
-        # extra calc of self._curr_obs, for imitation reward
-        self._compute_hoi_observations()
 
         # self._compute_hoi_observations()
         self._update_hist_hoi_obs()
@@ -154,7 +148,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                    self._contact_forces,
                                                    self._rigid_body_pos, self.max_episode_length,
                                                    self._enable_early_termination, self._termination_heights, 
-                                                   self._curr_ref_obs, self._curr_obs, self._motion_data.envid2episode_lengths
+                                                   self._curr_ref_obs, self._curr_obs, self.envid2episode_lengths
                                                    )
         return
     
@@ -170,12 +164,157 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                   )
         return
     
+    def smooth_quat_seq(self, quat_seq):
+        n = quat_seq.size(0)
+
+        for i in range(1, n):
+            dot_product = torch.dot(quat_seq[i-1], quat_seq[i])
+            if dot_product < 0:
+                quat_seq[i] *=-1
+
+        return quat_seq
+    
 
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
-        self.max_episode_length = 600 if self.skill_name in ['run'] else 400 #100 + 400 #ZC30
 
-        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.init_vel)
+        # '''load HOI dataset'''
+        self.hoi_data_dict = {}
+
+        grab_path = motion_file
+        all_seqs = glob.glob(grab_path + '/*.pt')
+        self.my_data_dict = {}
+
+        data_idx = 0
+        self.motion_lengths = torch.zeros(len(all_seqs), device=self.device, dtype=torch.long) #Z {}
+        # self.motion_class = torch.zeros(len(all_seqs), device=self.device, dtype=torch.int)
+        motion_class = np.zeros(len(all_seqs), dtype=int)
+        self.layup_target = torch.zeros((len(all_seqs),3), device=self.device, dtype=torch.float) #metric
+        self.root_target = torch.zeros((len(all_seqs),3), device=self.device, dtype=torch.float) 
+
+        import re
+        def sort_key(filename):
+            match = re.search(r'\d+.pt$', filename)
+            if match:
+                return int(match.group().replace('.pt', ''))
+            else:
+                return -1
+        all_seqs.sort(key = sort_key)
+
+        self.max_episode_length = 600 if self.skill_name in ['run'] else 400 #100 + 400 #ZC30
+        for i in range(len(all_seqs)):
+            loaded_dict = {}
+            hoi_data = torch.load(all_seqs[i])
+            loaded_dict['hoi_data_text'] = os.path.basename(all_seqs[i])[0:3] #ZC 29:29+3
+            print("load data:",loaded_dict['hoi_data_text'],hoi_data.shape[0],all_seqs[i])
+            loaded_dict['hoi_data'] = hoi_data.detach().to('cuda')
+
+            # loaded_dict['hoi_data'] = torch.cat(
+            #     (
+            #         loaded_dict['hoi_data'],
+            #         loaded_dict['hoi_data'][-1:].repeat(40 + 200,1)
+            #     ), dim=0
+            # )
+            
+            # if loaded_dict['hoi_data_text'] == '1':
+            #     loaded_dict['hoi_data'] = torch.cat(
+            #         (
+            #             loaded_dict['hoi_data'],
+            #             loaded_dict['hoi_data'][-1:].repeat(20,1)
+            #         ), dim=0
+            #     )
+
+            # '''change the data framerate'''
+            # NOTE: this is used for temporary testing, and is not rigorous that may yield incorrect rotations.
+            dataFramesScale = self.cfg["env"]["dataFramesScale"]
+            # scale_hoi_data = torch.nn.functional.interpolate(loaded_dict['hoi_data'].unsqueeze(1).transpose(0,2), scale_factor=dataFramesScale, mode='linear', align_corners=True)
+            # loaded_dict['hoi_data'] = scale_hoi_data.transpose(0,2).squeeze(1).clone().contiguous()
+
+            if self.play_dataset==True:
+                self.max_episode_length = loaded_dict['hoi_data'].shape[0]
+            self.motion_played_length = loaded_dict['hoi_data'].shape[0] #fid
+
+            self.fps_data = self.cfg["env"]["dataFPS"]*dataFramesScale
+
+            loaded_dict['root_pos'] = loaded_dict['hoi_data'][:, 0:3].clone()
+            loaded_dict['root_pos_vel'] = (loaded_dict['root_pos'][1:,:].clone() - loaded_dict['root_pos'][:-1,:].clone())*self.fps_data
+            loaded_dict['root_pos_vel'] = torch.cat((torch.zeros((1, loaded_dict['root_pos_vel'].shape[-1])).to('cuda'),loaded_dict['root_pos_vel']),dim=0)
+
+            ############################
+            loaded_dict['root_rot_3d'] = loaded_dict['hoi_data'][:, 3:6].clone()
+            # print(loaded_dict['root_rot_3d']) #ZC5
+
+            loaded_dict['root_rot'] = torch_utils.exp_map_to_quat(loaded_dict['root_rot_3d']).clone()
+            self.smooth_quat_seq(loaded_dict['root_rot'])
+            
+            q_diff = torch_utils.quat_multiply(torch_utils.quat_conjugate(loaded_dict['root_rot'][:-1,:].clone()), loaded_dict['root_rot'][1:,:].clone())
+            angle, axis = torch_utils.quat_to_angle_axis(q_diff)
+            exp_map = torch_utils.angle_axis_to_exp_map(angle, axis)
+            loaded_dict['root_rot_vel'] = exp_map*self.fps_data
+            loaded_dict['root_rot_vel'] = torch.cat((torch.zeros((1, loaded_dict['root_rot_vel'].shape[-1])).to('cuda'),loaded_dict['root_rot_vel']),dim=0)
+
+
+
+            loaded_dict['dof_pos'] = loaded_dict['hoi_data'][:, 9:9+156].clone()
+            loaded_dict['dof_pos_vel'] = (loaded_dict['dof_pos'][1:,:].clone() - loaded_dict['dof_pos'][:-1,:].clone())*self.fps_data
+            loaded_dict['dof_pos_vel'] = torch.cat((torch.zeros((1, loaded_dict['dof_pos_vel'].shape[-1])).to('cuda'),loaded_dict['dof_pos_vel']),dim=0)
+
+            data_length = loaded_dict['hoi_data'].shape[0]
+            loaded_dict['body_pos'] = loaded_dict['hoi_data'][:, 165: 165+53*3].clone().view(data_length,53,3)
+            loaded_dict['key_body_pos'] = loaded_dict['body_pos'][:, self._key_body_ids, :].view(data_length,-1).clone()
+            loaded_dict['key_body_pos_vel'] = (loaded_dict['key_body_pos'][1:,:].clone() - loaded_dict['key_body_pos'][:-1,:].clone())*self.fps_data
+            loaded_dict['key_body_pos_vel'] = torch.cat((torch.zeros((1, loaded_dict['key_body_pos_vel'].shape[-1])).to('cuda'),loaded_dict['key_body_pos_vel']),dim=0)
+
+            loaded_dict['obj_pos'] = loaded_dict['hoi_data'][:, 318+6:321+6].clone()
+            loaded_dict['obj_pos_vel'] = (loaded_dict['obj_pos'][1:,:].clone() - loaded_dict['obj_pos'][:-1,:].clone())*self.fps_data
+            if self.init_vel:
+                loaded_dict['obj_pos_vel'] = torch.cat((loaded_dict['obj_pos_vel'][:1],loaded_dict['obj_pos_vel']),dim=0)
+            else:
+                loaded_dict['obj_pos_vel'] = torch.cat((torch.zeros((1, loaded_dict['obj_pos_vel'].shape[-1])).to('cuda'),loaded_dict['obj_pos_vel']),dim=0) 
+
+            loaded_dict['obj_rot'] = -loaded_dict['hoi_data'][:, 321+6:324+6].clone()
+            loaded_dict['obj_rot_vel'] = (loaded_dict['obj_rot'][1:,:].clone() - loaded_dict['obj_rot'][:-1,:].clone())*self.fps_data
+            loaded_dict['obj_rot_vel'] = torch.cat((torch.zeros((1, loaded_dict['obj_rot_vel'].shape[-1])).to('cuda'),loaded_dict['obj_rot_vel']),dim=0)
+            loaded_dict['obj_rot'] = torch_utils.exp_map_to_quat(-loaded_dict['hoi_data'][:, 321+6:324+6]).clone()
+
+            loaded_dict['contact'] = torch.round(loaded_dict['hoi_data'][:, 330+6:331+6].clone())
+            # loaded_dict['contact'] = torch.ones(loaded_dict['hoi_data'].shape[0],1).to('cuda')
+            assert(torch.any(torch.abs(loaded_dict['contact'][:,0] - 0.5) <= 0.5, dim=0))
+            
+
+            loaded_dict['hoi_data'] = torch.cat((
+                                                    loaded_dict['root_pos'].clone(),
+                                                    loaded_dict['root_rot_3d'].clone(),
+                                                    loaded_dict['dof_pos'].clone(),
+                                                    loaded_dict['dof_pos_vel'].clone(),
+                                                    loaded_dict['obj_pos'].clone(),
+                                                    loaded_dict['obj_rot'].clone(),
+                                                    loaded_dict['obj_pos_vel'].clone(),
+                                                    loaded_dict['key_body_pos'][:,:].clone(),
+                                                    loaded_dict['contact'].clone()
+                                                    ),dim=-1)
+
+            assert(self.ref_hoi_obs_size == loaded_dict['hoi_data'].shape[-1])
+
+            self.hoi_data_dict[i] = loaded_dict
+            data_idx += 1 
+            self.motion_lengths[i] = loaded_dict['hoi_data'].shape[0] #Z
+            motion_class[i] = int(loaded_dict['hoi_data_text'])
+            if self.skill_name in ['layup', "SHOT_up"]: #metric
+                layup_target_ind = torch.argmax(loaded_dict['obj_pos'][:,2])
+                self.layup_target[i] = loaded_dict['obj_pos'][layup_target_ind]
+                self.root_target[i] = loaded_dict['root_pos'][layup_target_ind]
+
+
+        self.num_motions = data_idx
+
+        unique_classes, counts = np.unique(motion_class, return_counts=True)
+        class_to_index = {k: v for v, k in enumerate(unique_classes)}
+        class_weights = 1 / counts
+        # if 1 in class_to_index:
+        #     class_weights[class_to_index[1]] *= 2
+        indexed_classes = np.array([class_to_index[int(cls)] for cls in motion_class], dtype=int)
+        self.motion_weights = class_weights[indexed_classes]
 
         return
     
@@ -229,45 +368,164 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         return
 
-    def _reset_actors(self, env_ids):
+    def _reset_humanoid(self, env_ids):
         if self._state_init == SkillMimicBallPlay.StateInit.Start \
               or self._state_init == SkillMimicBallPlay.StateInit.Random:
             self._reset_random_ref_state_init(env_ids) #V1 Random Ref State Init (RRSI)
         else:
             assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
-        super()._reset_actors(env_ids)
-
-        return
-
-    def _reset_humanoid(self, env_ids):
-        self._humanoid_root_states[env_ids, 0:3] = self.init_root_pos[env_ids]
-        self._humanoid_root_states[env_ids, 3:7] = self.init_root_rot[env_ids]
-        self._humanoid_root_states[env_ids, 7:10] = self.init_root_pos_vel[env_ids]
-        self._humanoid_root_states[env_ids, 10:13] = self.init_root_rot_vel[env_ids]
-        
-        self._dof_pos[env_ids] = self.init_dof_pos[env_ids]
-        self._dof_vel[env_ids] = self.init_dof_pos_vel[env_ids]
         return
 
 
     def _reset_random_ref_state_init(self, env_ids): #Z11
         num_envs = env_ids.shape[0]
 
-        motion_ids = self._motion_data.sample_motions(num_envs)
-        motion_times = self._motion_data.sample_time(motion_ids)
+        if (self._state_init == SkillMimicBallPlay.StateInit.Random
+            or self._state_init == SkillMimicBallPlay.StateInit.Hybrid):
+            motion_times = torch.randint(0, self.hoi_data_dict[0]['hoi_data'].shape[0]-2, (num_envs,), device=self.device, dtype=torch.long)
+        elif (self._state_init == SkillMimicBallPlay.StateInit.Start):
+            motion_times = torch.zeros(num_envs, device=self.device, dtype=torch.long)#.int()
 
-        self.reward_weights, self.hoi_data_batch, \
-        self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
-        self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
-        self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
-            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times, self.reward_weights_default)
+        self.motion_times = motion_times.clone()
 
-        # if self.show_motion_test == False:
-        #     print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \
-        #         'motionlength:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data'].shape[0]) #ZC
-        #     self.show_motion_test = True
+        # self.envid2motid = torch.zeros(self.num_envs, device=self.device, dtype=torch.long) #{}
+        # self.envid2episode_lengths = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        # self.envid2idt = {}
 
+
+        #TODO: i should has shape of env_ids
+        for i in env_ids: #range(self.num_envs):
+
+            # id_motion = self.motion_id_test #fid
+            # id_motion = int(os.environ.get('clip', '-1')) 
+            # id_motion = random.randint(0, self.num_motions-1)
+            id_motion = np.random.choice(np.arange(self.num_motions), p=self.motion_weights/self.motion_weights.sum())
+            # id_motion = int(i % self.num_motions)
+            # id_motion = random.choice(self.options)
+            self.envid2motid[i] = id_motion
+            
+            # id_t = self.init_from_frame_test #ZC3
+            # id_t = self.motion_lengths[id_motion] - 6 + random.randint(-10, 4)
+            # id_t = random.randint(2,  - 2) ###??wrongly added??
+            # id_t = random.randint(2, self.motion_lengths[id_motion] - 2)
+            #id_t = random.randint(2, 20)
+            id_t = 2
+            # id_t = random.randint(2, self.motion_lengths[id_motion] - 2) \
+            #     if self.skill_name not in ['layup', 'SHOT_up'] else random.randint(3, 10)
+            # id_t = 2
+            # if random.randint(0,1) == 0:
+            #     id_t = random.randint(2, self.motion_lengths[id_motion] - 2)
+            # else:
+            #     id_t = 2  #+ random.randint(0, 4)
+
+            if id_t + self.max_episode_length > self.motion_lengths[id_motion]:
+                # id_t = 0
+                self.envid2episode_lengths[i] = self.motion_lengths[id_motion] - id_t
+            else:
+                # id_t = random.randint(1, self.motion_lengths[id_motion] - self.max_episode_length)
+                self.envid2episode_lengths[i] = self.max_episode_length
+            # id_t = random.randint(1, self.hoi_data_dict[id_motion]['hoi_data'].shape[0]-self.max_episode_length) 
+            # self.envid2idt[i] = id_t
+
+
+            #for class control
+            # print(self.hoi_data_dict[id_motion]['hoi_data_text']) #Z20
+            self.hoi_data_label_batch[i] = torch.nn.functional.one_hot(torch.tensor(int(self.hoi_data_dict[id_motion]['hoi_data_text'])).to("cuda"), num_classes=self.condition_size)#id_motion 
+            # self.hoi_data_label_batch[i] = torch.nn.functional.one_hot(torch.tensor(61).to("cuda"), num_classes=self.condition_size)#id_motion 
+
+            #for amplitude control
+            # self.hoi_data_label_batch[i] = torch.tensor(int(self.hoi_data_dict[id_motion]['hoi_data_text'])).to("cuda").repeat(self.condition_size)
+            # self.hoi_data_label_batch[i] = torch.tensor(1).to("cuda").repeat(self.condition_size) 
+
+            #for robust standup
+            if self.hoi_data_dict[id_motion]['hoi_data_text'] == '000': #Z
+
+                # disable object rewards
+                self.reward_weights["p"][i] = self.reward_weights_default["p"]
+                self.reward_weights["r"][i] = self.reward_weights_default["r"]
+                self.reward_weights["op"][i] = self.reward_weights_default["op"]*0.
+                self.reward_weights["ig"][i] = self.reward_weights_default["ig"]*0.
+                self.reward_weights["cg1"][i] = self.reward_weights_default["cg1"]*0.
+                self.reward_weights["cg2"][i] = self.reward_weights_default["cg2"]*0.
+
+                # self.hoi_data_batch[i] = self.hoi_data_dict[id_motion]['hoi_data'][id_t:id_t+self.max_episode_length]
+                self.hoi_data_batch[i] = torch.nn.functional.pad( #ZC
+                    self.hoi_data_dict[id_motion]['hoi_data'][id_t: id_t+self.envid2episode_lengths[i]],
+                    (0, 0, 0, self.max_episode_length - self.envid2episode_lengths[i])
+                    )
+
+                self.init_root_pos[i] = self.hoi_data_dict[id_motion]['root_pos'][id_t,:]
+
+                self.init_root_rot[i] = self.hoi_data_dict[id_motion]['root_rot'][id_t,:]
+                self.init_dof_pos[i] = self.hoi_data_dict[id_motion]['dof_pos'][id_t,:] #+ (torch.rand_like(self.hoi_data_dict[id_motion]['dof_pos'][id_t,:])-0.5)*1
+                self.init_root_pos_vel[i] = self.hoi_data_dict[id_motion]['root_pos_vel'][id_t,:]
+                self.init_root_rot_vel[i] = self.hoi_data_dict[id_motion]['root_rot_vel'][id_t,:]
+                self.init_dof_pos_vel[i] = self.hoi_data_dict[id_motion]['dof_pos_vel'][id_t,:]
+
+                self.init_obj_pos[i][0] = (torch.rand_like(self.init_obj_pos[i][0])-0.5)*10
+                self.init_obj_pos[i][1] = (torch.rand_like(self.init_obj_pos[i][0])-0.5)*10
+                self.init_obj_pos[i][2] = torch.rand_like(self.init_obj_pos[i][0])*5
+                self.init_obj_pos_vel[i] = torch.rand_like(self.init_obj_pos_vel[i])*5
+                self.init_obj_rot[i] = torch.rand_like(self.init_obj_rot[i])
+                self.init_obj_rot_vel[i] = torch.rand_like(self.init_obj_rot_vel[i])*0.1
+
+            # for general skill learning
+            else:
+                # enable full rewards
+                self.reward_weights["p"][i] = self.reward_weights_default["p"]
+                self.reward_weights["r"][i] = self.reward_weights_default["r"]
+                self.reward_weights["op"][i] = self.reward_weights_default["op"]
+                self.reward_weights["ig"][i] = self.reward_weights_default["ig"]
+                self.reward_weights["cg1"][i] = self.reward_weights_default["cg1"]
+                self.reward_weights["cg2"][i] = self.reward_weights_default["cg2"]
+
+                self.hoi_data_batch[i] = torch.nn.functional.pad( #ZC
+                    self.hoi_data_dict[id_motion]['hoi_data'][id_t: id_t+self.envid2episode_lengths[i]],
+                    (0, 0, 0, self.max_episode_length - self.envid2episode_lengths[i])
+                    ) #Z? :id_t+self.max_episode_length
+
+                self.init_root_pos[i] = self.hoi_data_dict[id_motion]['root_pos'][id_t,:]
+
+                self.init_root_rot[i] = self.hoi_data_dict[id_motion]['root_rot'][id_t,:]
+                self.init_dof_pos[i] = self.hoi_data_dict[id_motion]['dof_pos'][id_t,:]
+                self.init_root_pos_vel[i] = self.hoi_data_dict[id_motion]['root_pos_vel'][id_t,:]
+                self.init_root_rot_vel[i] = self.hoi_data_dict[id_motion]['root_rot_vel'][id_t,:]
+
+                self.init_dof_pos_vel[i] = self.hoi_data_dict[id_motion]['dof_pos_vel'][id_t,:]
+
+                self.init_obj_pos[i] = self.hoi_data_dict[id_motion]['obj_pos'][id_t,:]
+                self.init_obj_pos_vel[i] = self.hoi_data_dict[id_motion]['obj_pos_vel'][id_t,:]
+                self.init_obj_rot[i] = self.hoi_data_dict[id_motion]['obj_rot'][id_t,:]
+                self.init_obj_rot_vel[i] = self.hoi_data_dict[id_motion]['obj_rot_vel'][id_t,:]
+
+
+        if self.show_motion_test == False:
+            print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \
+                'motionlength:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data'].shape[0]) #ZC
+            self.show_motion_test = True
+
+
+        self._set_env_state(env_ids=env_ids, 
+                    root_pos=self.init_root_pos,
+                    root_rot=self.init_root_rot,
+                    dof_pos=self.init_dof_pos,
+                    root_vel=self.init_root_pos_vel,
+                    root_ang_vel=self.init_root_rot_vel,
+                    dof_vel=self.init_dof_pos_vel,
+                    )
+
+        return
+    
+    
+    def _set_env_state(self, env_ids, root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel):
+        self._humanoid_root_states[env_ids, 0:3] = root_pos[env_ids]
+        self._humanoid_root_states[env_ids, 3:7] = root_rot[env_ids]
+        self._humanoid_root_states[env_ids, 7:10] = root_vel[env_ids]
+        self._humanoid_root_states[env_ids, 10:13] = root_ang_vel[env_ids]
+        
+        self._dof_pos[env_ids] = dof_pos[env_ids]
+        self._dof_vel[env_ids] = dof_vel[env_ids]
         return
 
     
@@ -283,6 +541,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                                self._local_root_obs, self._root_height_obs, 
                                                                self._dof_obs_size, self._target_states,
                                                                self._hist_obs,
+                                                               self.fps_data,
                                                                self.progress_buf)
         else:
             self._curr_obs[env_ids] = build_hoi_observations(self._rigid_body_pos[env_ids][:, 0, :],
@@ -293,6 +552,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                                    self._local_root_obs, self._root_height_obs, 
                                                                    self._dof_obs_size, self._target_states[env_ids],
                                                                    self._hist_obs[env_ids],
+                                                                   self.fps_data,
                                                                    self.progress_buf[env_ids])
             
         # self._hist_obs = self._curr_obs.clone()
@@ -530,8 +790,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         return
 
-    def get_num_amp_obs(self):
-        return self.ref_hoi_obs_size
 
 
 
@@ -541,7 +799,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
 # @torch.jit.script
 def build_hoi_observations(root_pos, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos, 
-                           local_root_obs, root_height_obs, dof_obs_size, target_states, hist_obs, progress_buf):
+                           local_root_obs, root_height_obs, dof_obs_size, target_states, hist_obs, fps, progress_buf):
 
     ## diffvel, set 0 for the first frame
     # hist_dof_pos = hist_obs[:,6:6+156]
@@ -717,17 +975,17 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
     # type: (Tensor, Tensor, Tensor, Tensor, float, bool, Tensor, Tensor, Tensor, Tensor) -> Tuple[Tensor, Tensor]
     terminated = torch.zeros_like(reset_buf)
 
-    if (enable_early_termination):
-        body_height = rigid_body_pos[:, 0, 2] # root height
-        body_fall = body_height < termination_heights# [4096] 
-        has_failed = body_fall.clone()
-        has_failed *= (progress_buf > 1)
+    # if (enable_early_termination):
+    #     body_height = rigid_body_pos[:, 0, 2] # root height
+    #     body_fall = body_height < termination_heights# [4096] 
+    #     has_failed = body_fall.clone()
+    #     has_failed *= (progress_buf > 1)
         
-        terminated = torch.where(has_failed, torch.ones_like(reset_buf), terminated)
+    #     terminated = torch.where(has_failed, torch.ones_like(reset_buf), terminated)
 
-    reset = torch.where(progress_buf >= envid2episode_lengths-1, torch.ones_like(reset_buf), terminated) #ZC
+    # reset = torch.where(progress_buf >= envid2episode_lengths-1, torch.ones_like(reset_buf), terminated) #ZC
 
-    # reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)
+    reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)
     # reset = torch.zeros_like(reset_buf) #ZC300
 
     return reset, terminated

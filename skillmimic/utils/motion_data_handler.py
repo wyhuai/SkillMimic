@@ -150,23 +150,17 @@ class MotionDataHandler:
 
     def sample_time(self, motion_ids, truncate_time=None):
         if self.init_start_frame != None:
-            # 获取每个 motion_id 的 motion_length
             lengths = self.motion_lengths[motion_ids].cpu().numpy()
 
-            # 计算每个 motion_id 的随机采样范围
             start = 2
             end = lengths - 2
 
-            # 确保 end 大于 start
             assert np.all(end > start) # Maybe some motions are too short to sample time properly.
 
-            # 生成每个 motion_id 的随机采样时间，范围在 [2, motion_length - 2]
-            motion_times = np.random.randint(start, end + 1)  # +1 因为 np.random.randint 的上限是开区间
+            motion_times = np.random.randint(start, end + 1)  # +1  Because the upper limit of np.random.randint is an open interval
 
-            # 将结果转回到 PyTorch 张量
             motion_times = torch.tensor(motion_times, device=self.device, dtype=torch.int)
 
-            # 若需要截断时间长度，进行截断处理
             if truncate_time is not None:
                 assert truncate_time >= 0
                 motion_times = torch.min(motion_times, self.motion_lengths[motion_ids] - truncate_time)
@@ -178,18 +172,17 @@ class MotionDataHandler:
 
     def get_initial_state(self, env_ids, motion_ids, start_frames):
         """
-        获取给定 motion_ids 和 start_frames 的初始状态。
+        Get the initial state for given motion_ids and start_frames.
         
-        参数:
-        motion_ids (Tensor): 张量，包含每个环境对应的 motion id。
-        start_frames (Tensor): 张量，包含每个环境对应的起始帧数。
+        Parameters:
+        motion_ids (Tensor): A tensor containing the motion id for each environment.
+        start_frames (Tensor): A tensor containing the starting frame number for each environment.
         
-        返回:
-        Tuple: 包含初始化状态的元组，按照顺序依次为 root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos。
+        Returns:
+        Tuple: A tuple containing the initial state
         """
         assert len(motion_ids) == len(env_ids)
 
-        # 计算每个 motion_id 的 episode 长度
         valid_lengths = self.motion_lengths[motion_ids] - start_frames
         self.envid2episode_lengths[env_ids] = torch.where(valid_lengths < self.max_episode_length,
                                     valid_lengths, self.max_episode_length)
@@ -233,8 +226,6 @@ class MotionDataHandler:
             obj_pos_vel_list.append(state["init_obj_pos_vel"])
             obj_rot_list.append(state["init_obj_rot"])
             obj_rot_vel_list.append(state["init_obj_rot_vel"])
-            
-        # 将列表转换为张量
 
         hoi_data = torch.stack(hoi_data_list, dim=0)
         root_pos = torch.stack(root_pos_list, dim=0)

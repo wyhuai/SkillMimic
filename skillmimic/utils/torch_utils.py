@@ -27,6 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import torch
+from torch import Tensor
 import numpy as np
 
 from isaacgym.torch_utils import *
@@ -184,17 +185,17 @@ def calc_heading_quat_inv(q):
 @torch.jit.script
 def quat_conjugate(q):
     # type: (Tensor) -> Tensor
-    # 计算四元数的共轭，输入 q 是一个四元数或四元数数组
-    # 四元数的格式是 [x, y, z, w]，其中 w 是实部
-    q_conj = q.clone()  # 复制 q 以避免修改原始数据
-    q_conj[..., 0:3] = -q_conj[..., 0:3]  # 改变 x, y, z 分量的符号
+    # Compute the conjugate of a quaternion. The input q is a quaternion or an array of quaternions.
+    # The format of the quaternion is [x, y, z, w], where w is the real part.
+    q_conj = q.clone()  # Clone q to avoid modifying the original data.
+    q_conj[..., 0:3] = -q_conj[..., 0:3]  # Negate the x, y, z components.
     return q_conj
 
 @torch.jit.script
 def quat_multiply(q1, q2):
     # type: (Tensor, Tensor) -> Tensor
-    # 计算两个四元数的乘积
-    # 输入的四元数格式是 [x, y, z, w]，其中 w 是实部
+    # Compute the product of two quaternions.
+    # The input quaternion format is [x, y, z, w], where w is the real part.
     x1, y1, z1, w1 = q1[..., 0], q1[..., 1], q1[..., 2], q1[..., 3]
     x2, y2, z2, w2 = q2[..., 0], q2[..., 1], q2[..., 2], q2[..., 3]
 

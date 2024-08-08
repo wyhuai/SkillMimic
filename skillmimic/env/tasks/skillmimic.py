@@ -155,7 +155,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
-
+        self.max_episode_length = 60
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]
 

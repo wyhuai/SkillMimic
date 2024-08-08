@@ -15,16 +15,14 @@ from env.tasks.humanoid_object_task import HumanoidWholeBodyWithObject
 
 
 class SkillMimicBallPlay(HumanoidWholeBodyWithObject): 
-    class StateInit(Enum):
-        Default = 0
-        Start = 1
-        Random = 2
-        Hybrid = 3
-
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
         state_init = cfg["env"]["stateInit"]
-        self._state_init = SkillMimicBallPlay.StateInit[state_init]
-        self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
+        if state_init.lower() == "random":
+            self._state_init = -1
+            print("Random Reference State Init (RRSI)")
+        else:
+            self._state_init = int(state_init)
+            print(f"Deterministic Reference State Init from {self._state_init}")
 
         self.motion_file = cfg['env']['motion_file']
         self.play_dataset = cfg['env']['playdataset']
@@ -33,7 +31,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.save_images = cfg['env']['saveImages']
         self.init_vel = cfg['env']['initVel']
         self.isTest = cfg['args'].test
-        self.init_start_frame = cfg['args'].init_start_frame
 
         self.condition_size = 64
 
@@ -162,13 +159,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
-        if self.init_start_frame != -1:
-            self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
-                                                self.max_episode_length, self.reward_weights_default, self.init_vel,
-                                                self.init_start_frame)
-        else:
-            self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
-                                                self.max_episode_length, self.reward_weights_default, self.init_vel)
+
+        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
+                                            self.max_episode_length, self.reward_weights_default, self.init_vel)
 
         return
     
@@ -212,11 +205,12 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         return
 
     def _reset_actors(self, env_ids):
-        if self._state_init == SkillMimicBallPlay.StateInit.Start \
-              or self._state_init == SkillMimicBallPlay.StateInit.Random:
+        if self._state_init == -1:
             self._reset_random_ref_state_init(env_ids) #V1 Random Ref State Init (RRSI)
+        elif self._state_init >= 2:
+            self._reset_deterministic_ref_state_init(env_ids)
         else:
-            assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert(False), f"Unsupported state initialization from: {self._state_init}"
 
         super()._reset_actors(env_ids)
 
@@ -239,19 +233,28 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = self._motion_data.sample_time(motion_ids)
 
-        # self.reward_weights[env_ids], 
         self.hoi_data_batch[env_ids], \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
         self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
         self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
             = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
-        # if self.show_motion_test == False:
-        #     print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \
-        #         'motionlength:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data'].shape[0]) #ZC
-        #     self.show_motion_test = True
+        return
+    
+    def _reset_deterministic_ref_state_init(self, env_ids):
+        num_envs = env_ids.shape[0]
+
+        motion_ids = self._motion_data.sample_motions(num_envs)
+        motion_times = torch.full(motion_ids.shape, self._state_init, device=self.device, dtype=torch.int)
+
+        self.hoi_data_batch[env_ids], \
+        self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
+        self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
+        self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
+            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
         return
+
 
     
     def _compute_hoi_observations(self, env_ids=None):

@@ -19,14 +19,36 @@ continuous scoring (green), which involves dribbling toward the basket, timing t
 
 ## Installation 💽
 
-Download Isaac Gym from the [website](https://developer.nvidia.com/isaac-gym), then
-follow the installation instructions.
-
-Once Isaac Gym is installed, install the external dependencies for this repo:
-
+### Step 1: create conda environment
 ```
+conda create -n skillmimic python=3.8
+conda activate skillmimic
 pip install -r requirements.txt
 ```
+Or you can simply run the following command
+```
+conda env create -f environment.yml
+```
+
+### Step 2: download and install the Issac Gym
+
+Download Isaac Gym from the [website](https://developer.nvidia.com/isaac-gym), then
+unzip the file using following command.
+
+```
+tar -xzvf /{your_source_dir}/IsaacGym_Preview_4_Package.tar.gz -C /{your_target_dir}/
+cd /{your_target_dir}/isaacgym/python/
+pip install -e .
+```
+
+Test the Isaac Gym.
+```
+cd /{your_target_dir}/isaacgym/python/examples
+python joint_monkey.py
+```
+
+If you can see the pop-up interface, it means the installation is successful.
+
 
 ## Pre-Trained Models
 Download the pre-trained models from here [link](https://??), unzip the files, and put them into `skillmimic/data/models/`. The directory structure should be like `skillmimic/data/models/mixedskills/nn/PhysHOI.pth`, etc.

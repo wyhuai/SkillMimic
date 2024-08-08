@@ -65,7 +65,6 @@ class HRLHookshot(HumanoidWholeBodyWithObject):
         self.reward_weights_default = cfg["env"]["rewardWeights"]
         self.save_images = cfg['env']['saveImages']
         self.init_vel = cfg['env']['initVel']
-        self.ball_size = cfg['env']['ballSize']
 
         super().__init__(cfg=cfg,
                          sim_params=sim_params,

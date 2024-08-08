@@ -18,6 +18,8 @@ env:
   dataFPS: 120 #ZC
   dataFramesScale: .5 # 120 -> 60 fps
   ballSize: 1.
+  ballRestitution: 0.81
+  ballDensity: 1000.
 
   localRootObs: False
   keyBodies: ["Head", "L_Knee", "R_Knee", "L_Elbow", "R_Elbow", "L_Ankle", "R_Ankle", "L_Index3", "L_Middle3", "L_Pinky3", "L_Ring3","L_Thumb3","R_Index3", "R_Middle3", "R_Pinky3", "R_Ring3","R_Thumb3"] # #["L_Hip", "L_Knee", "left_foot", "L_Toe", "R_Hip", "R_Knee", "right_foot", "R_Toe", "Torso", "Spine", "Chest", "Neck", "Head", "L_Thorax", "L_Shoulder", "L_Elbow", "left_hand", "R_Thorax", "R_Shoulder", "R_Elbow", "right_hand"] #["right_hand", "left_hand", "right_foot", "left_foot"]

@@ -23,6 +23,11 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
         self.projtype = cfg['env']['projtype']
         
+        # Ball Properties
+        self.ball_size = cfg['env']['ballSize']
+        self.ball_restitution = cfg['env']['ballRestitution']
+        self.ball_density = cfg['env']['ballDensity']
+
         super().__init__(cfg=cfg,
                          sim_params=sim_params,
                          physics_engine=physics_engine,
@@ -62,7 +67,7 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
         asset_options.angular_damping = 0.01
         asset_options.linear_damping = 0.01
         asset_options.max_angular_velocity = 100.0
-        asset_options.density = 1000. #85.0#*6
+        asset_options.density = self.ball_density #85.0#*6
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         asset_options.vhacd_enabled = True
         asset_options.vhacd_params.max_convex_hulls = 1
@@ -111,7 +116,7 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
         ball_props =  self.gym.get_actor_rigid_shape_properties(env_ptr, target_handle)
         # Modify the properties
         for b in ball_props:
-            b.restitution = 0.81 #0.66 #1.6
+            b.restitution = self.ball_restitution #0.66 #1.6
         self.gym.set_actor_rigid_shape_properties(env_ptr, target_handle, ball_props)  
         
         # set ball color

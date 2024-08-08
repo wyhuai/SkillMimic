@@ -32,7 +32,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.reward_weights_default = cfg["env"]["rewardWeights"]
         self.save_images = cfg['env']['saveImages']
         self.init_vel = cfg['env']['initVel']
-        self.ball_size = cfg['env']['ballSize']
         self.isTest = cfg['args'].test
         self.init_start_frame = cfg['args'].init_start_frame
 

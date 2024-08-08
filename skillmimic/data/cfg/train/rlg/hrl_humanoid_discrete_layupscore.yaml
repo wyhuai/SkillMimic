@@ -80,3 +80,5 @@ params:
 
     latent_dim: 7 #ZC0
     control_mapping: [31,1,2,12,13,11,31]
+
+    resume_from: None

@@ -26,8 +26,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self._state_init = SkillMimicBallPlay.StateInit[state_init]
         self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
 
-        # self._reset_default_env_ids = []
-        # self._reset_ref_env_ids = []
         self.motion_file = cfg['env']['motion_file']
         self.play_dataset = cfg['env']['playdataset']
         self.robot_type = cfg["env"]["asset"]["assetFileName"]
@@ -35,6 +33,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.save_images = cfg['env']['saveImages']
         self.init_vel = cfg['env']['initVel']
         self.ball_size = cfg['env']['ballSize']
+        self.isTest = self.cfg['args'].test
 
         self.condition_size = 64
 
@@ -139,7 +138,8 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                    self._contact_forces,
                                                    self._rigid_body_pos, self.max_episode_length,
                                                    self._enable_early_termination, self._termination_heights, 
-                                                   self._curr_ref_obs, self._curr_obs, self._motion_data.envid2episode_lengths
+                                                   self._curr_ref_obs, self._curr_obs, self._motion_data.envid2episode_lengths,
+                                                   self.isTest, self.cfg["env"]["episodeLength"]
                                                    )
         return
     
@@ -158,7 +158,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
-        self.max_episode_length = 600 if self.skill_name in ['run'] else 400 #100 + 400 #ZC30
+
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
@@ -690,8 +690,9 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, hoi_obs_hist, contact_buf, tar_con
 
 @torch.jit.script
 def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
-                           max_episode_length, enable_early_termination, termination_heights, hoi_ref, hoi_obs, envid2episode_lengths):
-    # type: (Tensor, Tensor, Tensor, Tensor, float, bool, Tensor, Tensor, Tensor, Tensor) -> Tuple[Tensor, Tensor]
+                           max_episode_length, enable_early_termination, termination_heights, hoi_ref, hoi_obs, envid2episode_lengths,
+                           isTest, episodeLength):
+    # type: (Tensor, Tensor, Tensor, Tensor, float, bool, Tensor, Tensor, Tensor, Tensor, bool, int) -> Tuple[Tensor, Tensor]
     terminated = torch.zeros_like(reset_buf)
 
     if (enable_early_termination):
@@ -702,7 +703,10 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
         
         terminated = torch.where(has_failed, torch.ones_like(reset_buf), terminated)
 
-    reset = torch.where(progress_buf >= envid2episode_lengths-1, torch.ones_like(reset_buf), terminated) #ZC
+    if isTest and episodeLength > 0 :
+        reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)
+    else:
+        reset = torch.where(progress_buf >= envid2episode_lengths-1, torch.ones_like(reset_buf), terminated) #ZC
 
     # reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)
     # reset = torch.zeros_like(reset_buf) #ZC300

@@ -23,6 +23,7 @@
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
                 // "~/Downloads/BallPlay-M_0712/run", //"physhoi/data/motions/test", //"physhoi/data/motions/ballplay_large/pick_cls",
                 "--headless",
+                "--state_init", "10"
             ],
             "env": {
                 "CUDA_LAUNCH_BLOCKING":"1",

@@ -51,33 +51,33 @@ If you can see the pop-up interface, it means the installation is successful.
 
 
 ## Pre-Trained Models
-Download the pre-trained models from here [link](https://??), unzip the files, and put them into `skillmimic/data/models/`. The directory structure should be like `skillmimic/data/models/mixedskills/nn/PhysHOI.pth`, etc.
+Download the pre-trained models from here [link](https://??), unzip the files, and put them into `skillmimic/data/models/`. The directory structure should be like `skillmimic/data/models/mixedskills/nn/SkillMimic.pth`, etc.
 
 ## Skill Policy ⛹️‍♂️
 The skill policy can be trained purely from demonstrations, without the need for designing case-by-case skill rewards. Our method allows a single policy to learn a large variety of basketball skills from a dataset that contains diverse skills. 
 ### Inference
 Run the following command.
 ```
-python physhoi/run.py --test --task PhysHOI_BallPlay --num_envs 16 --cfg_env physhoi/data/cfg/physhoi.yaml --cfg_train physhoi/data/cfg/train/rlg/physhoi.yaml --motion_file physhoi/data/motions/BallPlay/[task].pt --checkpoint physhoi/data/models/[task]/nn/PhysHOI.pth
+python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
 ```
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
 `1: pick up`, `2: shot`, `3: dribble left`, `4: dribble forward`, `5: dribble right`, `6: layup`, `7: turnaround layup`.
 - You may change `--motion_file` to alter the initialization, or add `--init_start_frame` to disable random initialization.
 - To view the HOI dataset, add `--play_dataset`.
-- To save the images, add `--save_images test_images` to the command, and the images will be saved in `physhoi/data/images/test_images`.
-- To transform the images into a video, run the following command, and the video can be found in `physhoi/data/videos`.
+- To save the images, add `--save_images test_images` to the command, and the images will be saved in `skillmimic/data/images/test_images`.
+- To transform the images into a video, run the following command, and the video can be found in `skillmimic/data/videos`.
 ```
-python physhoi/utils/make_video.py --image_path physhoi/data/images/test_images --fps 60
+python skillmimic/utils/make_video.py --image_path skillmimic/data/images/test_images --fps 60
 ```
 
 ### Training
 To train the skill policy, run the following command: 
 ```
-python physhoi/run.py --task PhysHOI_BallPlay --cfg_env physhoi/data/cfg/physhoi.yaml --cfg_train physhoi/data/cfg/train/rlg/physhoi.yaml --motion_file physhoi/data/motions/BallPlay/toss.pt --headless
+python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss --headless
 ```
-- During the training, the latest checkpoint PhysHOI.pth will be regularly saved to output/, along with a Tensorboard log.
-- You may change the `--motion_file` to train skill policy on different data, e.g., `--motion_file physhoi/data/motions/skillset_1`.
-- It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file physhoi/data/motions/skillset_1`
+- During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
+- You may change the `--motion_file` to train skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
+- It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1`
 
 ## High-Level Controller ⛹️‍♂️
 Once the skill policy is learned, we can train a high-level controller to reuse the learned skills to accomplish complex high-level tasks.
@@ -85,14 +85,14 @@ Once the skill policy is learned, we can train a high-level controller to reuse 
 ### Inference
 Run the following command.
 ```
-python physhoi/run.py --test --task PhysHOI_BallPlay --num_envs 16 --cfg_env physhoi/data/cfg/physhoi.yaml --cfg_train physhoi/data/cfg/train/rlg/physhoi.yaml --motion_file physhoi/data/motions/BallPlay/[task].pt --checkpoint physhoi/data/models/[task]/nn/PhysHOI.pth
+python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
 ```
 - You may change the target position by clicking your mouse.
 
 ### Training
-To train the skill policy, run the following command: 
+To train the task policy, run the following command: 
 ```
-python physhoi/run.py --task PhysHOI_BallPlay --cfg_env physhoi/data/cfg/physhoi.yaml --cfg_train physhoi/data/cfg/train/rlg/physhoi.yaml --motion_file physhoi/data/motions/BallPlay/toss.pt --headless
+python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss.pt --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --headless
 ```
 
 ### The BallPlay dataset 🏀

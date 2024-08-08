@@ -33,7 +33,8 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.save_images = cfg['env']['saveImages']
         self.init_vel = cfg['env']['initVel']
         self.ball_size = cfg['env']['ballSize']
-        self.isTest = self.cfg['args'].test
+        self.isTest = cfg['args'].test
+        self.init_start_frame = cfg['args'].init_start_frame
 
         self.condition_size = 64
 
@@ -162,7 +163,13 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
-        self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, self.max_episode_length, self.reward_weights_default, self.init_vel)
+        if self.init_start_frame != -1:
+            self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
+                                                self.max_episode_length, self.reward_weights_default, self.init_vel,
+                                                self.init_start_frame)
+        else:
+            self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
+                                                self.max_episode_length, self.reward_weights_default, self.init_vel)
 
         return
     

@@ -7,11 +7,13 @@ import re
 from utils import torch_utils
 
 class MotionDataHandler:
-    def __init__(self, motion_file, device, key_body_ids, cfg, num_envs, max_episode_length, reward_weights_default, init_vel=False, play_dataset=False):
+    def __init__(self, motion_file, device, key_body_ids, cfg, num_envs, max_episode_length, reward_weights_default, 
+                init_vel=False, init_start_frame=None, play_dataset=False):
         self.device = device
         self._key_body_ids = key_body_ids
         self.cfg = cfg
         self.init_vel = init_vel
+        self.init_start_frame = init_start_frame
         self.play_dataset = play_dataset #V1
         
         self.hoi_data_dict = {}
@@ -146,27 +148,30 @@ class MotionDataHandler:
         motion_ids = torch.multinomial(torch.tensor(self._motion_weights), num_samples=n, replacement=True)
         return motion_ids
 
-    def sample_time(self, motion_ids, truncate_time=None):        
-        # 获取每个 motion_id 的 motion_length
-        lengths = self.motion_lengths[motion_ids].cpu().numpy()
+    def sample_time(self, motion_ids, truncate_time=None):
+        if self.init_start_frame != None:
+            # 获取每个 motion_id 的 motion_length
+            lengths = self.motion_lengths[motion_ids].cpu().numpy()
 
-        # 计算每个 motion_id 的随机采样范围
-        start = 2
-        end = lengths - 2
+            # 计算每个 motion_id 的随机采样范围
+            start = 2
+            end = lengths - 2
 
-        # 确保 end 大于 start
-        assert np.all(end > start) # Maybe some motions are too short to sample time properly.
+            # 确保 end 大于 start
+            assert np.all(end > start) # Maybe some motions are too short to sample time properly.
 
-        # 生成每个 motion_id 的随机采样时间，范围在 [2, motion_length - 2]
-        motion_times = np.random.randint(start, end + 1)  # +1 因为 np.random.randint 的上限是开区间
+            # 生成每个 motion_id 的随机采样时间，范围在 [2, motion_length - 2]
+            motion_times = np.random.randint(start, end + 1)  # +1 因为 np.random.randint 的上限是开区间
 
-        # 将结果转回到 PyTorch 张量
-        motion_times = torch.tensor(motion_times, device=self.device, dtype=torch.int)
+            # 将结果转回到 PyTorch 张量
+            motion_times = torch.tensor(motion_times, device=self.device, dtype=torch.int)
 
-        # 若需要截断时间长度，进行截断处理
-        if truncate_time is not None:
-            assert truncate_time >= 0
-            motion_times = torch.min(motion_times, self.motion_lengths[motion_ids] - truncate_time)
+            # 若需要截断时间长度，进行截断处理
+            if truncate_time is not None:
+                assert truncate_time >= 0
+                motion_times = torch.min(motion_times, self.motion_lengths[motion_ids] - truncate_time)
+        else:
+            motion_times = torch.full(motion_ids.shape, self.init_start_frame, device=self.device, dtype=torch.int)
 
         return motion_times
 

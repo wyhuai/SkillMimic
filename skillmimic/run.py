@@ -271,7 +271,7 @@ def main():
 
     if args.resume_from:
         cfg_train['params']['config']['resume_from'] = args.resume_from
-    
+
     # Create default directories for weights and statistics
     cfg_train['params']['config']['train_dir'] = args.output_path
     

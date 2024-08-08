@@ -400,37 +400,36 @@ def compute_scoring_reward(root_pos, root_vel, ball_pos, ball_vel, ball_contact,
 
 def calculate_landing_position(v0, position0, h):
     """
-    计算篮球在降落至高度h时的xy坐标。
+    Calculate the xy-coordinates of a basketball when it descends to a height h.
 
-    :param v0: 初始速度的向量，形状为(batch, 3)。
-    :param position0: 初始位置的向量，形状为(batch, 3)。
-    :param h: 目标高度。
-    :return: 在高度h时的xy坐标，形状为(batch, 2)。如果篮球无法达到高度h，则返回False。
+    :param v0: Initial velocity vector, shape (batch, 3).
+    :param position0: Initial position vector, shape (batch, 3).
+    :param h: Target height.
+    :return: The xy-coordinates at height h, shape (batch, 2). If the basketball cannot reach height h, returns False.
     """
-    g = 9.8 # 重力加速度，单位 m/s^2
+    g = 9.8 # Gravitational acceleration, unit m/s^2
 
-    # 计算篮球的最大高度
+    # Calculate the maximum height of the basketball
     h_max = position0[:, 2] + v0[:, 2]**2 / (2 * g)
 
-    # 检查篮球是否能达到高度h
+    # Check if the basketball can reach height h
     h = torch.where(h_max < h, torch.tensor(0., device=v0.device), h)
 
-    # 计算达到高度h所需的时间t
+    # Calculate the time t required to reach height h
     t = (torch.sqrt(v0[:, 2]**2 + 2 * g * (position0[:, 2] - h)) - v0[:, 2]) / g
 
-    # 计算x和y坐标
+    # Calculate the x and y coordinates
     x = position0[:, 0] + v0[:, 0] * t
     y = position0[:, 1] + v0[:, 1] * t
 
     x = torch.where(h_max < h, torch.tensor(100., device=v0.device), x)
     y = torch.where(h_max < h, torch.tensor(100., device=v0.device), y)
 
-    # 组合x和y坐标
+    # Combine the x and y coordinates
     xy_positions = torch.stack((x, y), dim=1)
 
-    
-
     return xy_positions
+
 
 # @torch.jit.script
 def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos, ball_pos, root_pos, goal_pos,

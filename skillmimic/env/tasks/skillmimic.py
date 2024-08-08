@@ -355,7 +355,14 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
             elif (evt.action == "035") and evt.value > 0:
                 self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(35).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
 
-                
+    # def pre_play_dataset(self):
+    #     env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
+    #     if self._state_init == -1:
+    #         self._reset_random_ref_state_init(env_ids) #V1 Random Ref State Init (RRSI)
+    #     elif self._state_init >= 2:
+    #         self._reset_deterministic_ref_state_init(env_ids)
+    #     else:
+    #         assert(False), f"Unsupported state initialization from: {self._state_init}"
     
     def play_dataset_step(self, time): #Z12
 
@@ -366,20 +373,20 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
             ### update object ###
             motid = self.envid2motid[env_id].item()
-            self._target_states[env_id, :3] = self.hoi_data_dict[motid]['obj_pos'][t,:]
-            self._target_states[env_id, 3:7] = self.hoi_data_dict[motid]['obj_rot'][t,:]
+            self._target_states[env_id, :3] = self._motion_data.hoi_data_dict[motid]['obj_pos'][t,:]
+            self._target_states[env_id, 3:7] = self._motion_data.hoi_data_dict[motid]['obj_rot'][t,:]
             self._target_states[env_id, 7:10] = torch.zeros_like(self._target_states[env_id, 7:10])
             self._target_states[env_id, 10:13] = torch.zeros_like(self._target_states[env_id, 10:13])
 
             ### update subject ###   
-            _humanoid_root_pos = self.hoi_data_dict[motid]['root_pos'][t,:].clone()
-            _humanoid_root_rot = self.hoi_data_dict[motid]['root_rot'][t,:].clone()
+            _humanoid_root_pos = self._motion_data.hoi_data_dict[motid]['root_pos'][t,:].clone()
+            _humanoid_root_rot = self._motion_data.hoi_data_dict[motid]['root_rot'][t,:].clone()
             self._humanoid_root_states[env_id, 0:3] = _humanoid_root_pos
             self._humanoid_root_states[env_id, 3:7] = _humanoid_root_rot
             self._humanoid_root_states[env_id, 7:10] = torch.zeros_like(self._humanoid_root_states[env_id, 7:10])
             self._humanoid_root_states[env_id, 10:13] = torch.zeros_like(self._humanoid_root_states[env_id, 10:13])
             
-            self._dof_pos[env_id] = self.hoi_data_dict[motid]['dof_pos'][t,:].clone()
+            self._dof_pos[env_id] = self._motion_data.hoi_data_dict[motid]['dof_pos'][t,:].clone()
             # self._dof_pos[:,108:156] = 0
             self._dof_vel[env_id] = torch.zeros_like(self._dof_vel[env_id])
 
@@ -387,16 +394,16 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
 
 
-            contact = self.hoi_data_dict[motid]['contact'][t,:]
+            contact = self._motion_data.hoi_data_dict[motid]['contact'][t,:]
             obj_contact = torch.any(contact > 0.1, dim=-1)
-            root_rot_vel = self.hoi_data_dict[motid]['root_rot_vel'][t,:]
+            root_rot_vel = self._motion_data.hoi_data_dict[motid]['root_rot_vel'][t,:]
             # angle, _ = torch_utils.exp_map_to_angle_axis(root_rot_vel)
             angle = torch.norm(root_rot_vel)
             abnormal = torch.any(torch.abs(angle) > 5.) #Z
 
             if abnormal == True:
                 print("frame:", t, "abnormal:", abnormal, "angle", angle)
-                # print(" ", self.hoi_data_dict[motid]['root_rot_vel'][t])
+                # print(" ", self._motion_data.hoi_data_dict[motid]['root_rot_vel'][t])
                 # print(" ", angle)
                 self.show_abnorm[env_id] = 10
 
@@ -435,20 +442,20 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         # if t>=(self.max_episode_length-1):
         #     hoi_data = torch.cat((
-        #                                             self.hoi_data_dict[0]['root_pos'][:-1].clone(),
-        #                                             self.hoi_data_dict[0]['root_rot_3d'][:-1].clone(),
+        #                                             self._motion_data.hoi_data_dict[0]['root_pos'][:-1].clone(),
+        #                                             self._motion_data.hoi_data_dict[0]['root_rot_3d'][:-1].clone(),
 
-        #                                             self.hoi_data_dict[0]['root_rot_3d'][:-1].clone(),
-        #                                             self.hoi_data_dict[0]['dof_pos'][:-1].clone(),
+        #                                             self._motion_data.hoi_data_dict[0]['root_rot_3d'][:-1].clone(),
+        #                                             self._motion_data.hoi_data_dict[0]['dof_pos'][:-1].clone(),
 
         #                                             self.keybodies[1:].reshape(-1,53*3),
 
-        #                                             self.hoi_data_dict[0]['obj_pos'][:-1].clone(),
-        #                                             torch.zeros_like(self.hoi_data_dict[0]['obj_pos'][:-1]),
-        #                                             torch.zeros_like(self.hoi_data_dict[0]['obj_pos'][:-1]),
-        #                                             torch.zeros_like(self.hoi_data_dict[0]['obj_pos'][:-1]),
+        #                                             self._motion_data.hoi_data_dict[0]['obj_pos'][:-1].clone(),
+        #                                             torch.zeros_like(self._motion_data.hoi_data_dict[0]['obj_pos'][:-1]),
+        #                                             torch.zeros_like(self._motion_data.hoi_data_dict[0]['obj_pos'][:-1]),
+        #                                             torch.zeros_like(self._motion_data.hoi_data_dict[0]['obj_pos'][:-1]),
                                                     
-        #                                             self.hoi_data_dict[0]['contact'][:-1].clone()
+        #                                             self._motion_data.hoi_data_dict[0]['contact'][:-1].clone()
         #                                             ),dim=-1)
 
         #     save_hoi_data = hoi_data.clone()
@@ -457,7 +464,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         #     sys.exit(0)
         
         # if t>=(self.max_episode_length-1): #ZC9
-        #     print(self.hoi_data_dict[0]['root_rot_3d']) #Z
+        #     print(self._motion_data.hoi_data_dict[0]['root_rot_3d']) #Z
         #     import sys
         #     sys.exit(0)
 
@@ -469,11 +476,11 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         self.gym.clear_lines(self.viewer)
 
-        starts = self.hoi_data_dict[0]['hoi_data'][t, :3]
+        starts = self._motion_data.hoi_data_dict[0]['hoi_data'][t, :3]
 
         for i, env_ptr in enumerate(self.envs):
             for j in range(len(self._key_body_ids)):
-                vec = self.hoi_data_dict[0]['key_body_pos'][t, j*3:j*3+3]
+                vec = self._motion_data.hoi_data_dict[0]['key_body_pos'][t, j*3:j*3+3]
                 vec = torch.cat([starts, vec], dim=-1).cpu().numpy().reshape([1, 6])
                 self.gym.add_lines(self.viewer, env_ptr, 1, vec, cols)
 
@@ -700,7 +707,7 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, hoi_obs_hist, contact_buf, tar_con
 @torch.jit.script
 def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
                            max_episode_length, enable_early_termination, termination_heights, hoi_ref, hoi_obs, envid2episode_lengths,
-                           isTest, episodeLength):
+                           isTest, maxEpisodeLength):
     # type: (Tensor, Tensor, Tensor, Tensor, float, bool, Tensor, Tensor, Tensor, Tensor, bool, int) -> Tuple[Tensor, Tensor]
     terminated = torch.zeros_like(reset_buf)
 
@@ -712,7 +719,7 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
         
         terminated = torch.where(has_failed, torch.ones_like(reset_buf), terminated)
 
-    if isTest and episodeLength > 0 :
+    if isTest and maxEpisodeLength > 0 :
         reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)
     else:
         reset = torch.where(progress_buf >= envid2episode_lengths-1, torch.ones_like(reset_buf), terminated) #ZC

@@ -45,9 +45,10 @@
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
                 //"physhoi/data/motions/BallPlay-M_0712/SHOT_up",//"physhoi/data/motions/ballplay_large/layup", //"physhoi/data/motions/test1/", //？ 不会用到，只是程序复用需要加载 mocap_0316_labeled3
-                //  "--play_dataset",
+                //  "--play_dataset", "--episode_length", "200", 
                 //  "--save_images",
                 "--projtype", "None", //"Mouse",
+                "--state_init", "2",
                 "--checkpoint", "skillmimic/data/models/PhysHOI_06-22-16-47-51/nn/PhysHOI.pth",
                 //"/media/hanx/Ventoy/table1/PhysHOI_27-22-10-08_our_shotup_e10000_r16/nn/PhysHOI.pth",
                 //"output/table_1/PhysHOI_28-04-19-04_dmwo_shotup_e10000_r133/nn/PhysHOI.pth",

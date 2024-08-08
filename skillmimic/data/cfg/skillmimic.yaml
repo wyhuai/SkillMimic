@@ -13,7 +13,7 @@ env:
   pdControl: True
   powerScale: 1.0
   controlFrequencyInv: 1 # 60 Hz #ZC
-  stateInit: "Start" #Random
+  stateInit: "Random" #2
   hybridInitProb: 0.5
   dataFPS: 120 #ZC
   dataFramesScale: .5 # 120 -> 60 fps

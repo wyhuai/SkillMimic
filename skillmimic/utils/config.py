@@ -252,8 +252,8 @@ def get_args(benchmark=False):
             "help": "Path to the saved weights for the low-level controller of an HRL agent."},
         {"name": "--resume_from", "type": str, "default": "", 
             "help": "Specify the checkpoint to continue training"},
-        {"name": "--init_start_frame", "type": int, "default": -1, 
-            "help": "Specify a specific initialization frame and disable random initialization."}
+        {"name": "--state_init", "type": str, "default": "Random", 
+            "help": "Specify a specific initialization frame and disable random initialization. Or Random Reference State Init"}
     ]
 
     if benchmark:

@@ -16,7 +16,7 @@ from env.tasks.humanoid_object_task import HumanoidWholeBodyWithObject
 
 class SkillMimicBallPlay(HumanoidWholeBodyWithObject): 
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
-        state_init = cfg["env"]["stateInit"]
+        state_init = str(cfg["env"]["stateInit"])
         if state_init.lower() == "random":
             self._state_init = -1
             print("Random Reference State Init (RRSI)")

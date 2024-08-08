@@ -69,8 +69,6 @@ params:
     seq_len: 4
     bounds_loss_coef: 10
     enable_eps_greedy: False 
-    resume_from: None #output/PhysHOI_15-22-34-37/nn/PhysHOI.pth 
-
-    latent_dim: 3 #ZC0
+    resume_from: None 
 
     # device: "cpu" #ZT9

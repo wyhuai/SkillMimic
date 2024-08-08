@@ -203,7 +203,7 @@ def get_args(benchmark=False):
             "help": "Can be None, Auto, Mouse"},
         {"name": "--task_type", "type": str,
             "default": "Python", "help": "Choose Python or C++"},
-        {"name": "--rl_device", "type": str, "default": "cpu", #ZT9  "cuda:0"
+        {"name": "--rl_device", "type": str, "default": "cuda:0", #ZT9 "cpu"
             "help": "Choose CPU or GPU device for inferencing policy network"},
         {"name": "--logdir", "type": str, "default": "logs/"},
         {"name": "--experiment", "type": str, "default": "Base",

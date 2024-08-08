@@ -47,9 +47,6 @@ import torch
 from torch import optim
 
 import learning.common_agent_discrete as common_agent_discrete
-# import learning.ase_agent as ase_agent
-# import learning.ase_models as ase_models
-# import learning.ase_network_builder as ase_network_builder
 import learning.skillmimic_models as skillmimic_models #ZC0
 import learning.skillmimic_network_builder as skillmimic_network_builder
 import learning.skillmimic_agent as skillmimic_agent
@@ -76,8 +73,15 @@ class HRLAgentDiscrete(common_agent_discrete.CommonAgentDiscrete):
         assert(llc_checkpoint != "")
         self._build_llc(llc_config_params, llc_checkpoint)
 
+        self.resume_from = config['resume_from']
+
         return
 
+    def train(self):
+        if self.resume_from != 'None':
+            self.restore(self.resume_from)
+        super().train()
+        
     def env_step(self, actions):
         # actions = self.preprocess_actions(actions)
         obs = self.obs['obs']

@@ -129,10 +129,33 @@
                 "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
                 "--headless"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1"
+            }
+        },
+        {
+            "name": "Testing HRL Discrete HookShot",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [ "--task", "HRLHookshot", "--num_envs", "16",
+                "--test",
+                "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
+                "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--checkpoint", "output/SkillMimicHookShot_08-07-17-45-22/nn/SkillMimicHookShot.pth",
             ],
             "env": {
                 "CUDA_LAUNCH_BLOCKING":"1"
@@ -179,7 +202,7 @@
                 "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
                 // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
                 "--headless"

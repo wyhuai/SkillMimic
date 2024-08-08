@@ -39,9 +39,6 @@ from rl_games.algos_torch.running_mean_std import RunningMeanStd
 from rl_games.common.player import BasePlayer
 
 import learning.common_player_discrete as common_player_discrete
-# import learning.ase_models as ase_models
-# import learning.ase_network_builder as ase_network_builder
-# import learning.ase_players as ase_players
 import learning.skillmimic_models as skillmimic_models #ZC0
 import learning.skillmimic_network_builder as skillmimic_network_builder
 import learning.skillmimic_players as skillmimic_players
@@ -289,7 +286,7 @@ class HRLPlayerDiscrete(common_player_discrete.CommonPlayerDiscrete):
 
     def _compute_llc_action(self, obs, actions):
         llc_obs = self._extract_llc_obs(obs)
-        print(actions)
+        # print(actions)
         # actions += 1 #ZC0
         # controlmapping = torch.tensor([31,1,2,12,13,11]).to(self.device)#{0:31, 1:1, 2:2, 3:12, 4:13, 5:11}
         controlmapping = torch.tensor(self._control_mapping).to(self.device)

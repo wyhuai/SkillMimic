@@ -30,7 +30,7 @@ env:
 
   asset:
     assetRoot: "skillmimic/data/assets" #projectname
-    assetFileName: "mjcf/mocap_humanoid.xml" #"mjcf/mocap_humanoid_boxhand.xml"
+    assetFileName: "mjcf/mocap_humanoid_boxhand.xml" #"mjcf/mocap_humanoid.xml"
 
   plane:
     staticFriction: 1.0

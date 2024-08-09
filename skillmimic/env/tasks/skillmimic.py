@@ -502,7 +502,7 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, hoi_obs_hist, contact_buf, tar_con
     # body vel smoothness reward
     # e_vel_diff = torch.mean((dof_pos_vel - dof_pos_vel_hist)**2, dim=-1)
     # r_vel_diff = torch.exp(-e_vel_diff * 0.05) #w['vel_diff']
-    e_vel_diff = torch.mean((dof_pos_vel - dof_pos_vel_hist)**2 / ((ref_dof_pos_vel + 1e-6)*1e6)**2, dim=-1)
+    e_vel_diff = torch.mean((dof_pos_vel - dof_pos_vel_hist)**2 / (((ref_dof_pos_vel**2) + 1e-12)*1e12), dim=-1)
     r_vel_diff = torch.exp(-e_vel_diff * 0.1) #w['vel_diff']
 
 
@@ -576,12 +576,12 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, hoi_obs_hist, contact_buf, tar_con
     contact_body_ids = [0,1,2,5,6,9,10,11,12,13,14,15,16,17,34,35,36]
     body_contact_buf = contact_buf[:, contact_body_ids, :].clone()
     body_contact = torch.all(torch.abs(body_contact_buf) < 0.1, dim=-1)
-    body_contact = torch.all(body_contact, dim=-1).to(float) # =1 when no contact happens to the body
+    body_contact = 1. - torch.all(body_contact, dim=-1).to(float) # =0 when no contact happens to the body
 
     # object contact
     obj_contact = torch.any(torch.abs(tar_contact_forces[..., 0:2]) > 0.1, dim=-1).to(float) # =1 when contact happens to the object
 
-    ref_body_contact = torch.ones_like(ref_obj_contact) # no body contact for all time
+    ref_body_contact = torch.zeros_like(ref_obj_contact) # no body contact for all time
     ecg1 = torch.abs(body_contact - ref_body_contact[:,0])
     rcg1 = torch.exp(-ecg1*w['cg1'])
     ecg2 = torch.abs(obj_contact - ref_obj_contact[:,0])

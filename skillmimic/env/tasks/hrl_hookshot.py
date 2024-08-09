@@ -44,15 +44,15 @@ TAR_ACTOR_ID = 1
 TAR_FACING_ACTOR_ID = 2
 
 class HRLHookshot(HumanoidWholeBodyWithObject):
-    class StateInit(Enum):
-        Default = 0
-        Start = 1
-        Random = 2
-        Hybrid = 3
-
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
-        state_init = cfg["env"]["stateInit"]
-        self._state_init = HRLHookshot.StateInit[state_init]
+        state_init = str(cfg["env"]["stateInit"])
+        if state_init.lower() == "random":
+            self._state_init = -1
+            print("Random Reference State Init (RRSI)")
+        else:
+            self._state_init = int(state_init)
+            print(f"Deterministic Reference State Init from {self._state_init}")
+
         
         self._enable_task_obs = False #cfg["env"]["enableTaskObs"]
         
@@ -94,7 +94,7 @@ class HRLHookshot(HumanoidWholeBodyWithObject):
 
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
-        # self.max_episode_length = 800
+        self.max_episode_length = 800
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
@@ -103,11 +103,12 @@ class HRLHookshot(HumanoidWholeBodyWithObject):
         return
 
     def _reset_actors(self, env_ids):
-        if self._state_init == HRLHookshot.StateInit.Start \
-              or self._state_init == HRLHookshot.StateInit.Random:
+        if self._state_init == -1:
             self._reset_random_ref_state_init(env_ids) #V1 Random Ref State Init (RRSI)
+        elif self._state_init >= 2:
+            self._reset_deterministic_ref_state_init(env_ids)
         else:
-            assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert(False), f"Unsupported state initialization from: {self._state_init}"
 
         super()._reset_actors(env_ids)
 
@@ -123,24 +124,31 @@ class HRLHookshot(HumanoidWholeBodyWithObject):
         self._dof_vel[env_ids] = self.init_dof_pos_vel[env_ids]
         return
 
-
     def _reset_random_ref_state_init(self, env_ids): #Z11
         num_envs = env_ids.shape[0]
 
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = self._motion_data.sample_time(motion_ids)
 
-        # self.reward_weights[env_ids], 
         _, \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
         self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
         self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
             = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
-        # if self.show_motion_test == False:
-        #     print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \
-        #         'motionlength:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data'].shape[0]) #ZC
-        #     self.show_motion_test = True
+        return
+    
+    def _reset_deterministic_ref_state_init(self, env_ids):
+        num_envs = env_ids.shape[0]
+
+        motion_ids = self._motion_data.sample_motions(num_envs)
+        motion_times = torch.full(motion_ids.shape, self._state_init, device=self.device, dtype=torch.int)
+
+        _, \
+        self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
+        self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
+        self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
+            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
         return
 

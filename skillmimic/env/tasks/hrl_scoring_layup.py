@@ -44,15 +44,15 @@ TAR_ACTOR_ID = 1
 TAR_FACING_ACTOR_ID = 2
 
 class HRLScoringLayup(HumanoidWholeBodyWithObject):
-    class StateInit(Enum):
-        Default = 0
-        Start = 1
-        Random = 2
-        Hybrid = 3
-
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
-        state_init = cfg["env"]["stateInit"]
-        self._state_init = HRLScoringLayup.StateInit[state_init]
+        state_init = str(cfg["env"]["stateInit"])
+        if state_init.lower() == "random":
+            self._state_init = -1
+            print("Random Reference State Init (RRSI)")
+        else:
+            self._state_init = int(state_init)
+            print(f"Deterministic Reference State Init from {self._state_init}")
+
 
         # self.motion_id_test = 3 # easy/018pickle_run_015_025_004.pt
         
@@ -101,7 +101,7 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
 
     def _load_motion(self, motion_file):
         self.skill_name = motion_file.split('/')[-1] #metric
-        # self.max_episode_length = 800
+        self.max_episode_length = 800
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]
 
@@ -110,11 +110,12 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
         return
 
     def _reset_actors(self, env_ids):
-        if self._state_init == HRLScoringLayup.StateInit.Start \
-              or self._state_init == HRLScoringLayup.StateInit.Random:
+        if self._state_init == -1:
             self._reset_random_ref_state_init(env_ids) #V1 Random Ref State Init (RRSI)
+        elif self._state_init >= 2:
+            self._reset_deterministic_ref_state_init(env_ids)
         else:
-            assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert(False), f"Unsupported state initialization from: {self._state_init}"
 
         super()._reset_actors(env_ids)
 
@@ -130,7 +131,6 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
         self._dof_vel[env_ids] = self.init_dof_pos_vel[env_ids]
         return
 
-
     def _reset_random_ref_state_init(self, env_ids): #Z11
         num_envs = env_ids.shape[0]
 
@@ -143,10 +143,19 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
         self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
             = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
-        # if self.show_motion_test == False:
-        #     print('motionid:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data_text'], \
-        #         'motionlength:', self.hoi_data_dict[int(self.envid2motid[0])]['hoi_data'].shape[0]) #ZC
-        #     self.show_motion_test = True
+        return
+    
+    def _reset_deterministic_ref_state_init(self, env_ids):
+        num_envs = env_ids.shape[0]
+
+        motion_ids = self._motion_data.sample_motions(num_envs)
+        motion_times = torch.full(motion_ids.shape, self._state_init, device=self.device, dtype=torch.int)
+
+        _, \
+        self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
+        self.init_dof_pos[env_ids], self.init_dof_pos_vel[env_ids], \
+        self.init_obj_pos[env_ids], self.init_obj_pos_vel[env_ids], self.init_obj_rot[env_ids], self.init_obj_rot_vel[env_ids] \
+            = self._motion_data.get_initial_state(env_ids, motion_ids, motion_times)
 
         return
 
@@ -185,24 +194,6 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
 
         if(len(env_ids)>0):
             n = len(env_ids)
-
-            # self._goal_position  = torch.tensor([-4,6], device=self.device, dtype=torch.float).repeat(n, 1)
-
-            # # Step 1: 生成[0, 1)范围的随机数据
-            # random_radii = torch.rand([n], device=self.device, dtype=torch.float) * 6 + 2  # 半径 [2, 8]
-            # random_angles = torch.rand([n], device=self.device, dtype=torch.float) * 2 * np.pi  # 角度 [0, 2π]
-            # # Step 2: 转换为直角坐标
-            # self._goal_position[env_ids, 0] = random_radii * torch.cos(random_angles)  # x 坐标
-            # self._goal_position[env_ids, 1] = random_radii * torch.sin(random_angles)  # y 坐标
-
-            # n = self.num_envs
-            # # Generate spiral points
-            # angles = torch.linspace(0, 2 * np.pi * n, n, device=self.device, dtype=torch.float) # Angles from 0 to 2πn
-            # radii = torch.linspace(2, 8, n, device=self.device, dtype=torch.float) # Radii from 2 to 8
-
-            # Convert to Cartesian coordinates
-            # self._goal_position[env_ids, 0] = torch.rand(n).to("cuda")*5#radii[env_ids] * torch.cos(angles[env_ids]) # x coordinates
-            # self._goal_position[env_ids, 1] = torch.rand(n).to("cuda")*5#radii[env_ids] * torch.sin(angles[env_ids]) # y coordinates
 
             d = torch.rand(n).to("cuda")*6 + 2
             theta = torch.rand(n).to("cuda")*torch.pi*2
@@ -391,37 +382,36 @@ def compute_scoring_reward(root_pos, root_vel, ball_pos, ball_vel, ball_contact,
 
 def calculate_landing_position(v0, position0, h):
     """
-    计算篮球在降落至高度h时的xy坐标。
+    Calculate the xy-coordinates of a basketball when it descends to a height h.
 
-    :param v0: 初始速度的向量，形状为(batch, 3)。
-    :param position0: 初始位置的向量，形状为(batch, 3)。
-    :param h: 目标高度。
-    :return: 在高度h时的xy坐标，形状为(batch, 2)。如果篮球无法达到高度h，则返回False。
+    :param v0: Initial velocity vector, shape (batch, 3).
+    :param position0: Initial position vector, shape (batch, 3).
+    :param h: Target height.
+    :return: The xy-coordinates at height h, shape (batch, 2). If the basketball cannot reach height h, returns False.
     """
-    g = 9.8 # 重力加速度，单位 m/s^2
+    g = 9.8 # Gravitational acceleration, unit m/s^2
 
-    # 计算篮球的最大高度
+    # Calculate the maximum height of the basketball
     h_max = position0[:, 2] + v0[:, 2]**2 / (2 * g)
 
-    # 检查篮球是否能达到高度h
+    # Check if the basketball can reach height h
     h = torch.where(h_max < h, torch.tensor(0., device=v0.device), h)
 
-    # 计算达到高度h所需的时间t
+    # Calculate the time t required to reach height h
     t = (torch.sqrt(v0[:, 2]**2 + 2 * g * (position0[:, 2] - h)) - v0[:, 2]) / g
 
-    # 计算x和y坐标
+    # Calculate the x and y coordinates
     x = position0[:, 0] + v0[:, 0] * t
     y = position0[:, 1] + v0[:, 1] * t
 
     x = torch.where(h_max < h, torch.tensor(100., device=v0.device), x)
     y = torch.where(h_max < h, torch.tensor(100., device=v0.device), y)
 
-    # 组合x和y坐标
+    # Combine the x and y coordinates
     xy_positions = torch.stack((x, y), dim=1)
 
-    
-
     return xy_positions
+
 
 # @torch.jit.script
 def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos, ball_pos, root_pos, goal_pos,

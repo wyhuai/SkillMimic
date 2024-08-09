@@ -302,7 +302,7 @@ class HRLPlayerDiscrete(common_player_discrete.CommonPlayerDiscrete):
         mu, _ = self._llc_agent.model.a2c_network.eval_actor(obs=processed_obs) #, cls_latents=z
         llc_action = players.rescale_actions(self.actions_low, self.actions_high, torch.clamp(mu, -1.0, 1.0))
         # llc_action = self._llc_agent.preprocess_actions(llc_action) 
-        # player的preprocess_actions 和 agent的preprocess_actions不一样，暂时的解决方案：在common_player_discrete中加上llc的
+        # The preprocess_actions of the player and the preprocess_actions of the agent are different. The temporary solution: add the LLC's preprocess_actions to common_player_discrete.
 
         return llc_action
 

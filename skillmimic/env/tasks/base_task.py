@@ -90,8 +90,8 @@ class BaseTask():
                 self.sim, gymapi.CameraProperties())
             self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_ESCAPE, "QUIT")
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
+            # self.gym.subscribe_viewer_keyboard_event(
+            #     self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
 
             # set the camera position based on up axis
             sim_params = self.gym.get_sim_params(self.sim)
@@ -153,7 +153,7 @@ class BaseTask():
                 sys.exit()
 
             # check for keyboard events
-            for evt in self.gym.query_viewer_action_events(self.viewer):
+            for evt in self.evts: #self.gym.query_viewer_action_events(self.viewer):
                 if evt.action == "QUIT" and evt.value > 0:
                     sys.exit()
                 elif evt.action == "toggle_viewer_sync" and evt.value > 0:

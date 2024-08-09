@@ -21,14 +21,11 @@
                 "--sim_device", "cuda:0", //"cpu",
                 "--pipeline", "gpu", //"cpu",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
-                // "~/Downloads/BallPlay-M_0712/run", //"physhoi/data/motions/test", //"physhoi/data/motions/ballplay_large/pick_cls",
                 "--headless",
                 "--state_init", "10"
             ],
             "env": {
                 "CUDA_LAUNCH_BLOCKING":"1",
-                // "LD_LIBRARY_PATH": "/project/t3_hwtsui/miniconda3/envs/rlgpu/lib",
-                // "PATH": "/project/t3_hwtsui/miniconda3/envs/rlgpu/bin/ninja:/project/t3_hwtsui/miniconda3/envs/rlgpu/bin/:${env:PATH}",
                 "CUDA_VISIBLE_DEVICES": "0"
             }
         },
@@ -40,24 +37,15 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": ["--test", "--task", "SkillMimicBallPlay", "--num_envs", "1", 
-                // "--episode_length", "10",
+                "--episode_length", "800",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", 
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
-                //"physhoi/data/motions/BallPlay-M_0712/SHOT_up",//"physhoi/data/motions/ballplay_large/layup", //"physhoi/data/motions/test1/", //？ 不会用到，只是程序复用需要加载 mocap_0316_labeled3
-                //  "--play_dataset",
+                //  "--play_dataset", "--episode_length", "200", 
                 //  "--save_images",
-                "--projtype", "None", //"Mouse",
-                "--checkpoint", "skillmimic/data/models/PhysHOI_06-22-16-47-51/nn/PhysHOI.pth",
-                //"/media/hanx/Ventoy/table1/PhysHOI_27-22-10-08_our_shotup_e10000_r16/nn/PhysHOI.pth",
-                //"output/table_1/PhysHOI_28-04-19-04_dmwo_shotup_e10000_r133/nn/PhysHOI.pth",
-                //"output/zrubbish/PhysHOI_23-16-00-33_dmwo_shotup_e31900_r128/nn/PhysHOI.pth",
-                //"output/PhysHOI_22-18-38-53_copy_e30850/nn/PhysHOI.pth",
-                //"output/table_1/PhysHOI_27-22-10-08_our_shotup_e10000_r16/nn/PhysHOI.pth",
-                //"output/PhysHOI_23-09-40-56/nn/PhysHOI.pth", //pick
-                //"output/PhysHOI_22-18-38-53_copy_e16800/nn/PhysHOI.pth", //shot_up
-                //"output/PhysHOI_22-17-50-24_copy_e10100/nn/PhysHOI.pth", //run
-                // "output/PhysHOI_22-17-47-11_copy_e10000/nn/PhysHOI.pth", //layup//"output/layup/nn/PhysHOI.pth",
+                "--projtype", "Mouse",
+                "--state_init", "2",
+                "--checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
                 // "--headless"
             ],
             "env": {
@@ -71,9 +59,7 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": [
-                // "--test",
-                "--task", "HRLCircling", "--num_envs", "256",
+            "args": ["--task", "HRLCircling", "--num_envs", "256",
                 "--episode_length", "800",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml",
@@ -82,7 +68,6 @@
                 "--pipeline", "gpu", //"cpu",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
                 "--headless"
             ],
             "env": {
@@ -96,9 +81,7 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": [
-                // "--test",
-                "--task", "HRLHeadingEasy", "--num_envs", "512",
+            "args": ["--task", "HRLHeadingEasy", "--num_envs", "512",
                 "--episode_length", "800",
                 "--rl_device", "cuda:0", //"cpu",
                 "--sim_device", "cuda:0", //"cpu",
@@ -107,7 +90,6 @@
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
                 "--headless"
             ],
             "env": {
@@ -121,18 +103,15 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": [
-                // "--test",
-                "--task", "HRLHookshot", "--num_envs", "512",
+            "args": ["--task", "HRLHookshot", "--num_envs", "256",
                 "--episode_length", "800",
                 "--rl_device", "cuda:0", //"cpu",
                 "--sim_device", "cuda:0", //"cpu",
                 "--pipeline", "gpu", //"cpu",
-                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
                 "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
                 "--headless"
             ],
             "env": {
@@ -152,7 +131,7 @@
                 "--rl_device", "cuda:0", //"cpu",
                 "--sim_device", "cuda:0", //"cpu",
                 "--pipeline", "gpu", //"cpu",
-                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
                 "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
@@ -169,9 +148,7 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": [
-                // "--test",
-                "--task", "HRLScoringLayup", "--num_envs", "512",
+            "args": ["--task", "HRLScoringLayup", "--num_envs", "512",
                 "--episode_length", "800",
                 "--rl_device", "cuda:0", //"cpu",
                 "--sim_device", "cuda:0", //"cpu",
@@ -179,8 +156,7 @@
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
-                // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 "--headless"
             ],
             "env": {
@@ -194,9 +170,7 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": [
-                // "--test",
-                "--task", "HRLHookshot", "--num_envs", "512",
+            "args": ["--task", "HRLHookshot", "--num_envs", "512",
                 "--episode_length", "800",
                 "--rl_device", "cuda:0", //"cpu",
                 "--sim_device", "cuda:0", //"cpu",
@@ -204,8 +178,6 @@
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
-                // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                // "--checkpoint", "output/PhysHOI_28-23-57-23/nn/PhysHOI.pth",
                 "--headless"
             ],
             "env": {

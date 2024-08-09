@@ -530,20 +530,6 @@ class CommonAgentDiscrete(a2c_discrete.DiscreteA2CAgent):
         self.actions_num = -1
         self.is_multi_discrete = False 
 
-        # 由于 class VecTask() 中并没有考虑的情况，而且是从 task->env 一路定义上来的，
-        # 另外 _build_net_config(self) 只使用self.actions_num，所以借鉴 hrl_agent.py 的思路，在上层 agent 中重载_setup_action_space(self)    
-           
-        # batch_size = self.num_agents * self.num_actors
-        # action_space = self.env_info['action_space']
-        # if type(action_space) is gym.spaces.Discrete:
-        #     self.actions_shape = (self.horizon_length, batch_size)
-        #     self.actions_num = action_space.n
-        #     self.is_multi_discrete = False
-        # if type(action_space) is gym.spaces.Tuple:
-        #     self.actions_shape = (self.horizon_length, batch_size, len(action_space)) 
-        #     self.actions_num = [action.n for action in action_space]
-        #     self.is_multi_discrete = True
-        
         return
 
     def _init_train(self):

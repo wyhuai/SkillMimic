@@ -19,7 +19,7 @@ PERTURB_PROJECTORS = [
     # ["large", 60],
 ]
 
-class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
+class HumanoidWholeBodyWithObject(HumanoidWholeBody): #metric
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
         self.projtype = cfg['env']['projtype']
         
@@ -241,7 +241,7 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
     
     def pre_physics_step(self, actions):
         super().pre_physics_step(actions)
-        self.envts = list(self.gym.query_viewer_action_events(self.viewer))
+        self.evts = list(self.gym.query_viewer_action_events(self.viewer))
         return 
     
     def post_physics_step(self):
@@ -294,7 +294,7 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
             
         elif self.projtype == 'Mouse':
             # mouse control
-            for evt in self.envts:
+            for evt in self.evts:
 
                 if evt.action == "reset" and evt.value > 0:
                     self.gym.set_sim_rigid_body_states(self.sim, self._proj_states, gymapi.STATE_ALL)
@@ -360,51 +360,6 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody, Metrics):
         
         obs = compute_obj_observations(root_states, tar_states)
         return obs
-
-
-    def _compute_metrics(self): #metric zqh
-        self.accuracy_buf, self.mpjpe_body_buf, self.mpjpe_ball_buf, self.contact_error_buf = compute_evaluation_metrics(
-                                                                                                            self._curr_ref_obs,
-                                                                                                            self._curr_obs,
-                                                                                                            self._contact_forces,
-                                                                                                            self._tar_contact_forces,
-                                                                                                            len(self._key_body_ids),
-                                                                                                            )
-        #metric for test yry
-        ball_pos = self._target_states[..., 0:3]
-        root_pos = self._humanoid_root_states[..., 0:3]
-
-        if self.skill_name == "pickup":
-            at_target = (ball_pos[:, 2] > 1.0)
-            self.reached_target = self.reached_target + at_target
-            self.succ_buf = self.reached_target > 0
-        elif self.skill_name in ["run", "rrun", "lrun"]:
-            rwrist_pos = self._rigid_body_pos[:,37] # 37: self._build_key_body_ids_tensor(['R_Wrist'])
-            distance_ball2rwrist = torch.norm(ball_pos - rwrist_pos, dim=-1)
-            ball_vel = self._rigid_body_state.view(self.num_envs, 54, 13)[..., self.num_bodies, 7:10] # 54: bodies_per_env
-            at_target = (root_pos[:, 2] > 0.5) & ((distance_ball2rwrist < 0.3) | (torch.abs(ball_vel[:, 2]) > 2.))
-
-            # distance_ball2root = torch.norm(ball_pos - root_pos, dim=-1)
-            # at_target = (root_pos[:, 2] > 0.5) & (distance_ball2root < 1.) & (ball_pos[:, 2] > 0.13)
-
-            # if self.progress_buf[0] == 1:
-            #     self.reached_target = self.reached_target | at_target
-            # else:
-            #     self.reached_target = self.reached_target & at_target
-            
-            self.reached_target += at_target
-            self.succ_buf = self.reached_target / self.max_episode_length
-        elif self.skill_name in ['layup', "SHOT_up"]:
-            # relative_pos = ball_pos - root_pos
-            # relative_pos_ref = self.layup_target[self.envid2motid] - self.root_target[self.envid2motid]
-            # distance_ball2targ = torch.norm(relative_pos - relative_pos_ref, dim=-1)
-            distance_ball2targ = torch.norm(ball_pos - self.layup_target[self.envid2motid], dim=-1)
-            at_target = (distance_ball2targ < 0.5) & (root_pos[:, 2] > 0.5)
-            self.reached_target = self.reached_target + at_target
-            self.succ_buf = self.reached_target > 0
-        
-        # print(self.reached_target)
-        # print(self._rigid_body_state.view(self.num_envs, 54, 13)[..., self.num_bodies, 0:3], ball_vel)
 
 
 

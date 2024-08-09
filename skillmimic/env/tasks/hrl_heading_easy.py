@@ -190,24 +190,6 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
         if(len(env_ids)>0):
             n = len(env_ids)
 
-            # self._goal_position  = torch.tensor([-4,6], device=self.device, dtype=torch.float).repeat(n, 1)
-
-            # # Step 1: 生成[0, 1)范围的随机数据
-            # random_radii = torch.rand([n], device=self.device, dtype=torch.float) * 6 + 2  # 半径 [2, 8]
-            # random_angles = torch.rand([n], device=self.device, dtype=torch.float) * 2 * np.pi  # 角度 [0, 2π]
-            # # Step 2: 转换为直角坐标
-            # self._goal_position[env_ids, 0] = random_radii * torch.cos(random_angles)  # x 坐标
-            # self._goal_position[env_ids, 1] = random_radii * torch.sin(random_angles)  # y 坐标
-
-            # n = self.num_envs
-            # # Generate spiral points
-            # angles = torch.linspace(0, 2 * np.pi * n, n, device=self.device, dtype=torch.float) # Angles from 0 to 2πn
-            # radii = torch.linspace(2, 8, n, device=self.device, dtype=torch.float) # Radii from 2 to 8
-
-            # # Convert to Cartesian coordinates
-            # self._goal_position[env_ids, 0] = radii[env_ids] * torch.cos(angles[env_ids]) # x coordinates
-            # self._goal_position[env_ids, 1] = radii[env_ids] * torch.sin(angles[env_ids]) # y coordinates
-
             d = torch.rand(n).to("cuda")*6 + 2
             theta = torch.rand(n).to("cuda")*torch.pi*2
             x = torch.sin(theta)*d

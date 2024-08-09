@@ -36,14 +36,8 @@ import learning.common_player as common_player
 # from utils import fid #V1
 # import physhoi.learning.fid as fid
 
-# from utils.signal_handler import setup_signal_handler, save_data #V1
-import os
-import signal
-#Initialising signal processing
-data = []
-save_path = 'skillmimic/data/obs/tmp.pt'
-
 METRIC = False
+
 class SkillMimicPlayerContinuous(common_player.CommonPlayer):
     def __init__(self, config):
         self._normalize_amp_input = config.get('normalize_amp_input', True)
@@ -56,8 +50,6 @@ class SkillMimicPlayerContinuous(common_player.CommonPlayer):
         return
 
     def run(self):
-        global data
-        # setup_signal_handler(data, save_path) #V1
 
         n_games = self.games_num #Z
         render = self.render_env
@@ -79,17 +71,6 @@ class SkillMimicPlayerContinuous(common_player.CommonPlayer):
             has_masks = self.env.has_action_mask()
 
         need_init_rnn = self.is_rnn
-        
-        # self.env.task.play_dataset = True
-        '''
-        all_obs = [] #fid
-        for t in range(self.env.task.motion_played_length): 
-            obs_buf = self.env.task.play_dataset_step(t)
-            all_obs.append(obs_buf.clone())
-        all_obs_tensor = torch.stack(all_obs)
-        '''
-        # self.env.task.play_dataset = False
-        # self.env.task.max_episode_length = 25
 
         sum_accuracy = 0 #metric
         sum_mpjpe_b = 0
@@ -152,8 +133,6 @@ class SkillMimicPlayerContinuous(common_player.CommonPlayer):
 
                     # a_out = fid.g_a_out #fid #V1
                     # hidden_sim.append(a_out)
-
-                    data.append(obs_dict['obs'].clone())
 
                     obs_dict, r, done, info =  self.env_step(self.env, action)
                     cr += r
@@ -247,46 +226,11 @@ class SkillMimicPlayerContinuous(common_player.CommonPlayer):
                     
                     done_indices = done_indices[:, 0]
 
-                print("succ_rate_till_now", sum_succ / games_played * n_game_life)
-                if episode == 0:
-                    games_played = 0
-                    sum_succ = 0
-                # except KeyboardInterrupt:
-                #     print("Manual interrupt received, saving data...")
-                #     data = torch.stack(data)
-                #     save_data(data, save_path)
-                
-                '''
-                hidden_dim = hidden_sim[0].shape[-1]
-                hidden_sim_3d = torch.stack(hidden_sim, dim=0) #(timesteps, n_envs, dim)
-                t1 = hidden_sim_3d[:-1] #(timesteps-1, n_envs, dim)
-                t2 = hidden_sim_3d[1:] #(timesteps-1, n_envs, dim)
-                paired_samples = torch.cat((t1, t2), dim=2).view(-1, hidden_dim * 2) #((timesteps-1) * n_envs , hidden_dim * 2)
-                # n_paired_sample = paired_samples.shape[0]
-                # hidden_paired_dim = paired_samples.shape[1]
-                mu1 = paired_samples.mean(dim=0) #(hidden_paired_dim,)
-                sigma1 = torch.cov(paired_samples.T) #(hidden_paired_dim, hidden_paired_dim)
-
-                ref_obs = all_obs_tensor #torch.load("skillmimic/data/obs/layup.pt")
-                for frame in range(ref_obs.shape[0]):
-                    ref_obs_dict = {}
-                    ref_obs_dict['obs'] = ref_obs[frame]
-                    _ = self.get_action(ref_obs_dict, is_determenistic) # where network is called #, a_out is added due to fid  
-                    a_out = fid.g_a_out #fid
-                    hidden_ref.append(a_out)
-                hidden_dim = hidden_ref[0].shape[-1]
-                hidden_ref_3d = torch.stack(hidden_ref, dim=0) #(timesteps, n_envs, dim)
-                t1 = hidden_ref_3d[:-1] #(timesteps-1, n_envs, dim)
-                t2 = hidden_ref_3d[1:] #(timesteps-1, n_envs, dim)
-                paired_ref = torch.cat((t1, t2), dim=2).view(-1, hidden_dim * 2) #((timesteps-1) * n_envs , hidden_dim * 2)
-                # n_paired_sample = paired_ref.shape[0]
-                # hidden_paired_dim = paired_ref.shape[1]
-                mu2 = paired_ref.mean(dim=0) #(hidden_paired_dim,)
-                sigma2 = torch.cov(paired_ref.T) #(hidden_paired_dim, hidden_paired_dim)
-
-                FID = fid.calculate_frechet_distance(mu1,sigma1,mu2,sigma2)
-                print("FID: ", FID)
-                '''
+                if METRIC:
+                    print("succ_rate_till_now", sum_succ / games_played * n_game_life)
+                    if episode == 0:
+                        games_played = 0
+                        sum_succ = 0
 
         print(sum_rewards)
         if print_game_res:

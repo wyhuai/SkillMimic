@@ -264,7 +264,7 @@ class HRLCircling(HumanoidWholeBodyWithObject):
             
         if self.projtype == 'Mouse':
             # mouse control
-            for evt in self.envts: #V1
+            for evt in self.evts: #V1
 
                 if (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
 

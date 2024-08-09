@@ -168,17 +168,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
 
     def _subscribe_events_for_change_condition(self):
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_Q, "pick")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_W, "layup")
-        # self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_E, "rrun")
-        # self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_R, "run")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_T, "getup")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_O, "shot_down")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_P, "shot_up")
-        
-        # self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_Z, "RunL")
-        # self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_X, "RunR")
-        # self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_C, "Run")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_A, "011")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_S, "012")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_D, "013")
@@ -194,9 +183,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     
 
     def _reset_envs(self, env_ids):
-        # self._reset_default_env_ids = []
-        # self._reset_ref_env_ids = []
-
         if(len(env_ids)>0): #metric
             self.reached_target[env_ids] = 0
         
@@ -255,8 +241,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         return
 
-
-    
     def _compute_hoi_observations(self, env_ids=None):
         key_body_pos = self._rigid_body_pos[:, self._key_body_ids, :]
 
@@ -280,89 +264,32 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                                                                    self._dof_obs_size, self._target_states[env_ids],
                                                                    self._hist_obs[env_ids],
                                                                    self.progress_buf[env_ids])
-            
-        # self._hist_obs = self._curr_obs.clone()
         
         return
     
     def _update_condition(self):
-        for evt in self.envts:
+        for evt in self.evts:
 
-            if evt.action == "pick" and evt.value > 0:
-                # self.gym.set_sim_rigid_body_states(self.sim, self._proj_states, gymapi.STATE_ALL)
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(1).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(0.2).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                self.control_signal = 1
-
-            elif (evt.action == "layup") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(2).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(1.4).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                self.control_signal = 7
-
-            elif (evt.action == "rrun") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(3).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(1.0).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-
-            elif (evt.action == "run") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(4).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(0.6).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-            
-            elif (evt.action == "getup") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(5).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(0.6).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                self.control_signal = 0
-
-            elif (evt.action == "shot_down") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(3).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(1.0).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size)
-                self.control_signal = 5
-
-            elif (evt.action == "shot_up") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(4).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                # self.hoi_data_label_batch = torch.tensor(0.6).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size)
-                self.control_signal = 6
-            
-            
-            elif (evt.action == "RunL") and evt.value > 0:
-                self.control_signal = 2 #1
-            elif (evt.action == "RunR") and evt.value > 0:
-                self.control_signal = 3 #2
-            elif (evt.action == "Run") and evt.value > 0:
-                self.control_signal = 4 #3
-            elif (evt.action == "2Run") and evt.value > 0:
-                self.control_signal = 9 #1
-            elif (evt.action == "SHOT") and evt.value > 0:
-                self.control_signal = 8 #3
-
-            elif (evt.action == "011") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(11).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+            if (evt.action == "011") and evt.value > 0:
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "012") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(12).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "013") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(13).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "001") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(1).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "002") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(2).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "031") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(31).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "032") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(32).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "033") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(33).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "034") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(34).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
             elif (evt.action == "035") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(35).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-
-    # def pre_play_dataset(self):
-    #     env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
-    #     if self._state_init == -1:
-    #         self._reset_random_ref_state_init(env_ids) #V1 Random Ref State Init (RRSI)
-    #     elif self._state_init >= 2:
-    #         self._reset_deterministic_ref_state_init(env_ids)
-    #     else:
-    #         assert(False), f"Unsupported state initialization from: {self._state_init}"
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
     
     def play_dataset_step(self, time): #Z12
 
@@ -432,41 +359,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.gym.simulate(self.sim)
 
         self._compute_observations()
-
-        # if t == 0: 
-        #     self.keybodies = self._rigid_body_pos[:1, :, :]
-            
-        # else:
-        #     self.keybodies = torch.cat((self.keybodies, self._rigid_body_pos[:1, :, :]),dim=0)      
-
-
-        # if t>=(self.max_episode_length-1):
-        #     hoi_data = torch.cat((
-        #                                             self._motion_data.hoi_data_dict[0]['root_pos'][:-1].clone(),
-        #                                             self._motion_data.hoi_data_dict[0]['root_rot_3d'][:-1].clone(),
-
-        #                                             self._motion_data.hoi_data_dict[0]['root_rot_3d'][:-1].clone(),
-        #                                             self._motion_data.hoi_data_dict[0]['dof_pos'][:-1].clone(),
-
-        #                                             self.keybodies[1:].reshape(-1,53*3),
-
-        #                                             self._motion_data.hoi_data_dict[0]['obj_pos'][:-1].clone(),
-        #                                             torch.zeros_like(self._motion_data.hoi_data_dict[0]['obj_pos'][:-1]),
-        #                                             torch.zeros_like(self._motion_data.hoi_data_dict[0]['obj_pos'][:-1]),
-        #                                             torch.zeros_like(self._motion_data.hoi_data_dict[0]['obj_pos'][:-1]),
-                                                    
-        #                                             self._motion_data.hoi_data_dict[0]['contact'][:-1].clone()
-        #                                             ),dim=-1)
-
-        #     save_hoi_data = hoi_data.clone()
-        #     torch.save(save_hoi_data, 'skillmimic/data/motions/mocap_0330_labeled/'+'015'+'.pt') #ZC7 #projectname
-        #     import sys
-        #     sys.exit(0)
-        
-        # if t>=(self.max_episode_length-1): #ZC9
-        #     print(self._motion_data.hoi_data_dict[0]['root_rot_3d']) #Z
-        #     import sys
-        #     sys.exit(0)
 
         return self.obs_buf
     

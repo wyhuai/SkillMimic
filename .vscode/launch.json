@@ -42,7 +42,7 @@
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
                 //  "--play_dataset", "--episode_length", "200", 
-                //  "--save_images",
+                // "--save_images", "test_images",
                 "--projtype", "Mouse",
                 "--state_init", "2",
                 "--checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",

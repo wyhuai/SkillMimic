@@ -7,7 +7,7 @@ env:
   enableDebugVis: False
   playdataset: False
   projtype: "None"
-  saveImages: False
+  saveImages: "" #False
   initVel: False
   
   pdControl: True

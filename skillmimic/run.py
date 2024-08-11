@@ -258,7 +258,7 @@ def main():
         cfg['env']['rewardWeights']['op'] = args.op
 
     if args.save_images:
-        cfg['env']['saveImages'] = True
+        cfg['env']['saveImages'] = args.save_images #True
     
     if args.init_vel:
         cfg['env']['initVel'] = True

@@ -392,7 +392,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                 else:
                     frame_id = self.progress_buf[env_ids]
                 # dataname = self.motion_file[len('skillmimic/data/motions/mocap_0330/'):-7] #ZC8 #projectname
-                dataname = "test_images"#"hlc_bc_SHOT"
+                dataname = self.save_images #"test_images"
                 rgb_filename = "skillmimic/data/images/" + dataname + "/rgb_env%d_frame%05d.png" % (env_ids, frame_id)
                 os.makedirs("skillmimic/data/images/" + dataname, exist_ok=True)
                 self.gym.write_viewer_image_to_file(self.viewer,rgb_filename)

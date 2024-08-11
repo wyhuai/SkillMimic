@@ -2,13 +2,13 @@ params:
   seed: -1
 
   algo:
-    name: physhoi
+    name: skillmimic
 
   model:
-    name: physhoi
+    name: skillmimic
 
   network:
-    name: physhoi
+    name: skillmimic
     separate: True
 
     space:

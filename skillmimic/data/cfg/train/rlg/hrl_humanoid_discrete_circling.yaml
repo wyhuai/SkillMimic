@@ -13,11 +13,11 @@ params:
 
     space:
       discrete:
-        actions_num: 10  # 假设有10个离散动作
+        actions_num: 10  # Assume there are 10 discrete actions
         logit_init:
           name: glorot_uniform_initializer 
           gain: 1.0
-          # name： uniform_initializer  # 初始化策略，假设使用均匀分布
+          # name： uniform_initializer  # Assume uniform distribution is used as the initialization strategy
           # min: -1.0
           # max: 1.0
 
@@ -61,7 +61,7 @@ params:
     ppo: True
     e_clip: 0.2
     horizon_length: 32
-    minibatch_size: 256 #16384 #256 #Z0 64
+    minibatch_size: 32768 #256 #16384 #256 #Z0 64
     mini_epochs: 6
     critic_coef: 5
     clip_value: False

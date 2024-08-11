@@ -49,7 +49,7 @@ class HRLBuilder(network_builder.A2CBuilder):
             elif self.is_discrete:
                 logits_init = self.init_factory.create(**self.space_config['logit_init']) #.get('logit_init', {'name': 'uniform', 'min': -1.0, 'max': 1.0})
                 logits_init(self.logits.weight)
-                torch.nn.init.zeros_(self.logits.bias)  # 假设我们希望偏差初始化为零
+                torch.nn.init.zeros_(self.logits.bias)  # Assume we want the bias to be initialized to zero
 
             return
         

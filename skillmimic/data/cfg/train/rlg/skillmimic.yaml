@@ -62,13 +62,13 @@ params:
     ppo: True
     e_clip: 0.2
     horizon_length: 32
-    minibatch_size: 4096 #65536 #61440 #32768 #65536 #16384
+    minibatch_size: 16384 #32768 #65536 #61440 #4096 #
     mini_epochs: 6
     critic_coef: 5
     clip_value: False
     seq_len: 4
     bounds_loss_coef: 10
-    enable_eps_greedy: False #Z0 ase中这一项是True
+    enable_eps_greedy: False #Z0 #set as True in ase
     resume_from: None
 
     # device: "cpu" #ZT9

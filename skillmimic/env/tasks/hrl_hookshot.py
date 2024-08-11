@@ -212,7 +212,7 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
 
     if (enable_early_termination):
         has_fallen = root_pos[..., 2] < termination_heights
-        has_fallen *= (progress_buf > 1) # 本质就是 与
+        has_fallen *= (progress_buf > 1) # Same effect as using OR
         terminated = torch.where(has_fallen, torch.ones_like(reset_buf), terminated)
     
     reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)

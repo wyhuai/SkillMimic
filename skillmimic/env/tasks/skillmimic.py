@@ -506,7 +506,7 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, hoi_obs_hist, contact_buf, tar_con
     r_vel_diff = torch.exp(-e_vel_diff * 0.1) #w['vel_diff']
 
 
-    rb = rp*rr*rpv*rrv *r_vel_diff #ZC
+    rb = rp*rr*rpv*rrv *r_vel_diff #ZC3
     # print(rp, rr, rpv, rrv) 
 
 

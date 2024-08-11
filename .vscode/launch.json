@@ -13,7 +13,7 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": ["--task", "SkillMimicBallPlay", "--num_envs", "512",
+            "args": ["--task", "SkillMimicBallPlay", "--num_envs", "2048",
                 "--episode_length", "60",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", //#projectname
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
@@ -67,11 +67,13 @@
                 "--sim_device", "cuda:0", //"cpu",
                 "--pipeline", "gpu", //"cpu",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
-                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                "--headless"
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
+                "--headless",
+                // "--resume_from", "output/SkillMimicCircling_08-02-59-47/nn/SkillMimicCircling.pth"
             ],
             "env": {
-                "CUDA_LAUNCH_BLOCKING":"1"
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "1"
             }
         },
         {
@@ -90,10 +92,12 @@
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml",
                 "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                "--headless"
+                "--headless",
+                // "--resume_from", "output/SkillMimicHeading_08-02-59-54/nn/SkillMimicHeading.pth"
             ],
             "env": {
-                "CUDA_LAUNCH_BLOCKING":"1"
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "2"
             }
         },
         {
@@ -112,10 +116,12 @@
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
                 "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
-                "--headless"
+                "--headless",
+                // "--resume_from", "output/SkillMimicHookShot_08-03-01-43/nn/SkillMimicHookShot.pth"
             ],
             "env": {
-                "CUDA_LAUNCH_BLOCKING":"1"
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "3"
             }
         },
         {
@@ -138,7 +144,8 @@
                 "--checkpoint", "output/SkillMimicHookShot_08-07-17-45-22/nn/SkillMimicHookShot.pth",
             ],
             "env": {
-                "CUDA_LAUNCH_BLOCKING":"1"
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "3"
             }
         },
         {
@@ -178,10 +185,13 @@
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
                 "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
-                "--headless"
+                // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--headless",
+                // "--resume_from", "output/SkillMimic_08-03-28-13/nn/SkillMimic.pth"
             ],
             "env": {
-                "CUDA_LAUNCH_BLOCKING":"1"
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "7"
             }
         },
     ]

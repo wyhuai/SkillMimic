@@ -57,9 +57,9 @@ class CommonAgentDiscrete(a2c_discrete.DiscreteA2CAgent):
         self._load_config_params(config)
 
         self.is_discrete = True
-        self._setup_action_space() #Z 参考 class ContinuousA2CBase(A2CBase)
+        self._setup_action_space() #Z Take reference from class ContinuousA2CBase(A2CBase)
 
-        #Z 移除动作约束
+        #Z Remove action constraints
         self._save_intermediate = config.get('save_intermediate', False)
 
         net_config = self._build_net_config()
@@ -288,7 +288,7 @@ class CommonAgentDiscrete(a2c_discrete.DiscreteA2CAgent):
             else:
                 res_dict = self.get_action_values(self.obs)
 
-            # # Z 将logits转换为概率
+            # # Z Converts logits into probabilities
             # logits = res_dict['logits']
             # # action_probs = torch.nn.functional.softmax(logits, dim=-1)
             # # actions = torch.multinomial(action_probs, 1).squeeze(-1)

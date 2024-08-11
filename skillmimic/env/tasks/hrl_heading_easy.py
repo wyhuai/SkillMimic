@@ -81,8 +81,6 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
 
         self._termination_heights = torch.tensor(self.cfg["env"]["terminationHeight"], device=self.device, dtype=torch.float)
 
-        #self.control_signal = 5 #默认直行
-
         self.reached_target = torch.zeros(
             self.num_envs, device=self.device, dtype=torch.bool)
         
@@ -271,7 +269,7 @@ def compute_heading_observations(root_pos, goal_pos, root_rot):
     local_facing_dir = torch_utils.quat_rotate(heading_rot, facing_dir)  
 
     local_tar_pos = goal_pos - root_pos[..., 0:2]
-    local_tar_pos_3d = torch.cat([local_tar_pos, torch.zeros_like(local_tar_pos[..., 0:1])], dim=-1)  # 扩展到3D向量
+    local_tar_pos_3d = torch.cat([local_tar_pos, torch.zeros_like(local_tar_pos[..., 0:1])], dim=-1)  # Expands to 3D vectors
     local_tar_pos = quat_rotate(heading_rot, local_tar_pos_3d)
     local_tar_pos = local_tar_pos[..., 0:2]
     
@@ -292,21 +290,21 @@ def compute_heading_observations(root_pos, goal_pos, root_rot):
 
 # @torch.jit.script
 def compute_heading_reward(root_pos, root_vel, ball_pos, goal_pos):
-    # # body定位奖励
+    # # Body position rewards
     # distance_to_goal = torch.norm(root_pos[:, :2] - goal_pos, dim=-1)
     # position_reward = torch.exp(-distance_to_goal)
     
-    # ball定位奖励
+    # Ball position rewards
     z_dim = torch.ones_like(goal_pos[:,:1])
     goal_pos = torch.cat([goal_pos, z_dim], dim=-1)
     distance_to_goal = torch.norm(ball_pos - goal_pos, dim=-1)
     position_reward = torch.exp(-distance_to_goal)
 
-    # # 摔倒惩罚
+    # # Fall down penalty
     # fall_threshold = torch.tensor(0.6, device=root_pos.device)
     # fall_penalty = torch.where(root_pos[..., 2] > fall_threshold, torch.tensor(1.0, device=root_pos.device), torch.tensor(0.1, device=root_pos.device))
 
-    # # 掉球惩罚
+    # # Drop ball penalty
     # distance_to_ball = torch.norm(root_pos - ball_pos, dim=-1)
     # drop_ball_threshold = torch.tensor(1.2, device=root_pos.device)
     # drop_ball_penalty = torch.where(distance_to_ball < drop_ball_threshold, torch.tensor(1.0, device=root_pos.device), torch.tensor(0.1, device=root_pos.device))
@@ -315,7 +313,7 @@ def compute_heading_reward(root_pos, root_vel, ball_pos, goal_pos):
     # v = torch.norm(root_vel,dim=-1)
     # v_penalty = torch.where((distance_to_goal > 0.5) & (v < 0.2), torch.tensor(0., device=root_pos.device), torch.tensor(1., device=root_pos.device))
 
-    # 组合奖励
+    # Total reward
     reward = position_reward#*fall_penalty*v_penalty
 
     # print(f'{float(position_reward[0]):20.2f}, {float(fall_penalty[0]):4.2f}, {float(drop_ball_penalty[0]):4.2f}')
@@ -345,7 +343,7 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
 
     if (enable_early_termination):
         has_fallen = root_pos[..., 2] < termination_heights
-        has_fallen *= (progress_buf > 1) # 本质就是 与
+        has_fallen *= (progress_buf > 1) # Same effect as using OR
         terminated = torch.where(has_fallen, torch.ones_like(reset_buf), terminated)
 
         # distance_to_goal = torch.norm(root_pos[:, :2] - goal_pos, dim=-1)

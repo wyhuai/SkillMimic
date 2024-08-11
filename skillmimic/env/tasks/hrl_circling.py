@@ -82,8 +82,6 @@ class HRLCircling(HumanoidWholeBodyWithObject):
 
         self._termination_heights = torch.tensor(self.cfg["env"]["terminationHeight"], device=self.device, dtype=torch.float)
 
-        #self.control_signal = 5 #默认直行
-
         self.reached_target = torch.zeros(
             self.num_envs, device=self.device, dtype=torch.bool)
         
@@ -298,7 +296,7 @@ def compute_circling_observations(root_pos, goal_pos, root_rot, goal_r):
     local_facing_dir = torch_utils.quat_rotate(heading_rot, facing_dir)  
 
     local_tar_pos = goal_pos - root_pos[..., 0:2]
-    local_tar_pos_3d = torch.cat([local_tar_pos, torch.zeros_like(local_tar_pos[..., 0:1])], dim=-1)  # 扩展到3D向量
+    local_tar_pos_3d = torch.cat([local_tar_pos, torch.zeros_like(local_tar_pos[..., 0:1])], dim=-1)  # Expands to 3D vectors
     local_tar_pos = quat_rotate(heading_rot, local_tar_pos_3d)
     local_tar_pos = local_tar_pos[..., 0:2]
     
@@ -319,21 +317,21 @@ def compute_circling_observations(root_pos, goal_pos, root_rot, goal_r):
 
 # @torch.jit.script
 def compute_circling_reward(root_pos, root_vel, ball_pos, ball_vel, goal_pos, goal_r):
-    # # body 定位奖励
+    # # Body position rewards
     # distance_to_goal = torch.norm(root_pos[:, :2] - goal_pos, dim=-1)
     # d_error = torch.norm(distance_to_goal.unsqueeze(-1) - goal_r, dim=-1)
     # position_reward = torch.exp(-d_error)
 
-    # ball 定位奖励
+    # Ball position rewards
     distance_to_goal = torch.norm(ball_pos[:, :2] - goal_pos, dim=-1)
     d_error = torch.norm(distance_to_goal.unsqueeze(-1) - goal_r, dim=-1)
     position_reward = torch.exp(-d_error)
 
-    # # 摔倒惩罚
+    # # Fall down penalty
     # fall_threshold = torch.tensor(0.6, device=root_pos.device)
     # fall_penalty = torch.where(root_pos[..., 2] > fall_threshold, torch.tensor(1.0, device=root_pos.device), torch.tensor(0.1, device=root_pos.device))
 
-    # # 掉球惩罚
+    # # Drop ball penalty
     # distance_to_ball = torch.norm(root_pos - ball_pos, dim=-1)
     # drop_ball_threshold = torch.tensor(1.2, device=root_pos.device)
     # drop_ball_penalty = torch.where(distance_to_ball < drop_ball_threshold, torch.tensor(1.0, device=root_pos.device), torch.tensor(0.1, device=root_pos.device))
@@ -342,10 +340,10 @@ def compute_circling_reward(root_pos, root_vel, ball_pos, ball_vel, goal_pos, go
     v = torch.norm(ball_vel,dim=-1)
     # v_penalty = v * 0.1
     
-    # 当速度<0.5时，奖励为0.1; 当速度>0.5时，奖励为1.0
+    # When the velocity is less than 0.5, the reward is 0.1; when the speed is larger than or equal to 0.5, the reward is 1.0
     v_penalty = torch.where(v < 0.5, torch.tensor(0.1, device=root_pos.device), torch.tensor(1., device=root_pos.device)) # yry
 
-    # 组合奖励
+    # Total reward
     reward = position_reward * v_penalty#*fall_penalty*v_penalty
 
     return reward
@@ -370,7 +368,7 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
 
     if (enable_early_termination):
         has_fallen = root_pos[..., 2] < termination_heights
-        has_fallen *= (progress_buf > 1) # 本质就是 与
+        has_fallen *= (progress_buf > 1) # Same effect as using OR
         terminated = torch.where(has_fallen, torch.ones_like(reset_buf), terminated)
 
         # distance_to_goal = torch.norm(root_pos[:, :2] - goal_pos, dim=-1)

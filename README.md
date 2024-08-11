@@ -85,14 +85,14 @@ Once the skill policy is learned, we can train a high-level controller to reuse 
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+python skillmimic/run.py --test --task HRLHookshot --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
 ```
 - You may change the target position by clicking your mouse.
 
 ### Training
 To train the task policy, run the following command: 
 ```
-python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss.pt --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --headless
+python skillmimic/run.py --task HRLHookshot --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss.pt --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --headless
 ```
 
 ### The BallPlay dataset 🏀

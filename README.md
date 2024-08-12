@@ -61,8 +61,9 @@ Run the following command.
 python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
 ```
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
-`1: pick up`, `2: shot`, `3: dribble left`, `4: dribble forward`, `5: dribble right`, `6: layup`, `7: turnaround layup`.
-- You may change `--motion_file` to alter the initialization, or add `--init_start_frame` to disable random initialization.
+`F: pick up`, `G: shot`, `A: dribble left`, `D: dribble forward`, `S: dribble right`, `Z: layup`, `V: turnaround layup`.
+
+- You may change `--motion_file` to alter the initialization, or add `--state_init` to disable random initialization.
 - To view the HOI dataset, add `--play_dataset`.
 - To save the images, add `--save_images test_images` to the command, and the images will be saved in `skillmimic/data/images/test_images`.
 - To transform the images into a video, run the following command, and the video can be found in `skillmimic/data/videos`.

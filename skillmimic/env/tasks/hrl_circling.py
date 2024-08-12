@@ -52,11 +52,7 @@ class HRLCircling(HumanoidWholeBodyWithObject):
         else:
             self._state_init = int(state_init)
             print(f"Deterministic Reference State Init from {self._state_init}")
-        # self.motion_id_test = 3 # easy/018pickle_run_015_025_004.pt
-        
-        # self._enable_task_obs = True #cfg["env"]["enableTaskObs"]
-        
-        # self.condition_size = 0
+
         self.goal_size = 5
 
         self.motion_file = cfg['env']['motion_file']
@@ -76,7 +72,6 @@ class HRLCircling(HumanoidWholeBodyWithObject):
         
         self._load_motion(self.motion_file)
 
-        # self._goal_position  = torch.tensor([2,-6], device=self.device, dtype=torch.float).repeat(self.num_envs, 1)
         self._goal_position = torch.zeros([self.num_envs, 2], device=self.device, dtype=torch.float)
         self._goal_radius = torch.zeros([self.num_envs, 1], device=self.device, dtype=torch.float)
 
@@ -162,10 +157,6 @@ class HRLCircling(HumanoidWholeBodyWithObject):
         if(len(env_ids)>0):
             n = len(env_ids)
 
-            # d = torch.rand(n).to("cuda")*6 + 2
-            # theta = torch.rand(n).to("cuda")*torch.pi*2
-            # x = torch.sin(theta)*d
-            # y = torch.cos(theta)*d
             self._goal_position[env_ids, 0] = self._humanoid_root_states[env_ids, 0]#+x
             self._goal_position[env_ids, 1] = self._humanoid_root_states[env_ids, 1]#+y
 
@@ -267,12 +258,6 @@ class HRLCircling(HumanoidWholeBodyWithObject):
                 if (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
 
                     n = self.num_envs
-                    # d = torch.rand(n).to("cuda")*4 + 2
-                    # theta = torch.rand(n).to("cuda")*torch.pi*2
-                    # x = torch.sin(theta)*d
-                    # y = torch.cos(theta)*d
-                    # self._goal_position[:, 0] = self._humanoid_root_states[:, 0]+x
-                    # self._goal_position[:, 1] = self._humanoid_root_states[:, 1]+y
                     self._goal_radius[:, :] = torch.rand(n,1).to("cuda")*5                   
                     self.reached_target[:] = False
 
@@ -327,24 +312,14 @@ def compute_circling_reward(root_pos, root_vel, ball_pos, ball_vel, goal_pos, go
     d_error = torch.norm(distance_to_goal.unsqueeze(-1) - goal_r, dim=-1)
     position_reward = torch.exp(-d_error)
 
-    # # Fall down penalty
-    # fall_threshold = torch.tensor(0.6, device=root_pos.device)
-    # fall_penalty = torch.where(root_pos[..., 2] > fall_threshold, torch.tensor(1.0, device=root_pos.device), torch.tensor(0.1, device=root_pos.device))
-
-    # # Drop ball penalty
-    # distance_to_ball = torch.norm(root_pos - ball_pos, dim=-1)
-    # drop_ball_threshold = torch.tensor(1.2, device=root_pos.device)
-    # drop_ball_penalty = torch.where(distance_to_ball < drop_ball_threshold, torch.tensor(1.0, device=root_pos.device), torch.tensor(0.1, device=root_pos.device))
-
     # still punish
     v = torch.norm(ball_vel,dim=-1)
-    # v_penalty = v * 0.1
     
     # When the velocity is less than 0.5, the reward is 0.1; when the speed is larger than or equal to 0.5, the reward is 1.0
     v_penalty = torch.where(v < 0.5, torch.tensor(0.1, device=root_pos.device), torch.tensor(1., device=root_pos.device)) # yry
 
     # Total reward
-    reward = position_reward * v_penalty#*fall_penalty*v_penalty
+    reward = position_reward * v_penalty
 
     return reward
 
@@ -355,34 +330,14 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, rigid_body_pos,
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, bool, Tensor) -> Tuple[Tensor, Tensor]
     
     terminated = torch.zeros_like(reset_buf)
-    # distance_to_goal = torch.norm(root_pos[:, :2] - goal_pos, dim=-1) 
-    # terminated = torch.where(distance_to_goal < 0.45, torch.ones_like(reset_buf), terminated)
-    # if(terminated[0]==1):
-    #     print("stop————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————")
-
-    # contact_body_ids = [0,1,2,5,6,9,10,11,12,13,14,15,16,17,34,35,36]
-    # body_contact_buf = contact_buf[:, contact_body_ids, :].clone()
-    # body_contact = torch.all(torch.abs(body_contact_buf) < 0.1, dim=-1)
-    # body_contact = torch.all(body_contact, dim=-1).to(float) # =1 when no contact happens to the body
-
-
+    
     if (enable_early_termination):
         has_fallen = root_pos[..., 2] < termination_heights
         has_fallen *= (progress_buf > 1) # Same effect as using OR
         terminated = torch.where(has_fallen, torch.ones_like(reset_buf), terminated)
 
-        # distance_to_goal = torch.norm(root_pos[:, :2] - goal_pos, dim=-1)
-
-        # lhand_pos = rigid_body_pos[:, 18, :]
-        # lhand_ball_distance = torch.norm(lhand_pos-ball_pos,dim=-1)
-        # terminated = torch.where(lhand_ball_distance<0.3, torch.ones_like(reset_buf), terminated)
-
-        #only for inference
-        # terminated = torch.where(distance_to_goal < 0.4, torch.ones_like(reset_buf), terminated)
-
     # reset = torch.where(progress_buf >= envid2episode_lengths-1, torch.ones_like(reset_buf), terminated) #ZC
 
     reset = torch.where(progress_buf >= max_episode_length -1, torch.ones_like(reset_buf), terminated)
-    # reset = torch.zeros_like(reset_buf) #ZC300
 
     return reset, terminated

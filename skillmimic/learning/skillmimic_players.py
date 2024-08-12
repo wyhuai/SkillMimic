@@ -30,7 +30,7 @@ import torch, time
 
 from rl_games.algos_torch import torch_ext
 from rl_games.algos_torch.running_mean_std import RunningMeanStd
-
+import os
 import learning.common_player as common_player
 
 # from utils import fid #V1
@@ -114,9 +114,10 @@ class SkillMimicPlayerContinuous(common_player.CommonPlayer):
                         all_obs.append(obs_buf.clone())
                     break
                 all_obs_tensor = torch.stack(all_obs)
-                path = "skillmimic/data/obs/layup.pt"
-                torch.save(all_obs_tensor, path)
-                print("save observation of reference @", path)
+                # os.makedirs("skillmimic/data/obs/", exist_ok=True) 
+                # path = "skillmimic/data/obs/layup.pt"
+                # torch.save(all_obs_tensor, path)
+                # print("save observation of reference @", path)
                 exit()
             else:
                 # try:

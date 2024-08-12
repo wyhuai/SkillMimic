@@ -115,7 +115,6 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
             textemb_batch = self.hoi_data_label_batch
             obs = torch.cat((obs,textemb_batch),dim=-1)
             self.obs_buf[:] = obs
-
             env_ids = torch.arange(self.num_envs)
             ts = self.progress_buf.clone() #self.progress_buf[0].clone()
             self._curr_ref_obs = self.hoi_data_batch[env_ids,ts].clone() #ZC0

@@ -153,11 +153,16 @@ class BaseTask():
                 sys.exit()
 
             # check for keyboard events
-            for evt in self.evts: #self.gym.query_viewer_action_events(self.viewer):
+            if hasattr(self, 'evts'):
+                evts = self.evts
+            else:
+                evts = self.gym.query_viewer_action_events(self.viewer)
+            for evt in evts: #self.gym.query_viewer_action_events(self.viewer):
                 if evt.action == "QUIT" and evt.value > 0:
                     sys.exit()
                 elif evt.action == "toggle_viewer_sync" and evt.value > 0:
                     self.enable_viewer_sync = not self.enable_viewer_sync
+            
 
             # fetch results
             if self.device != 'cpu':

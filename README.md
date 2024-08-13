@@ -84,11 +84,10 @@ python skillmimic/run.py --task SkillMimicBallPlay \
 --motion_file skillmimic/data/motions/BallPlay-M/[skill] --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
-- `--task` specifies the skill that the humanoid should perform.
-- `--cfg_env` specifies the environment configurations for that skill, such as number of environments, dataFPS, ball properties, ect.
-- `--cfg_train` specifies the training configurations for that skill, such as learning rate, maximum number of epochs, network settings, ect.
-- `--motion_file` can be changed to train a different skill policy on different data, e.g., `--motion_file skillmimic/data/motions/BallPlay-M/skillset_1`.
-- `--headless` is used to disable visualizations.
+- `--cfg_env` specifies the environment configurations, such as number of environments, dataFPS, ball properties, etc.
+- `--cfg_train` specifies the training configurations, such as learning rate, maximum number of epochs, network settings, etc.
+- `--motion_file` can be changed to train on different data, e.g., `--motion_file skillmimic/data/motions/BallPlay-M/skillset_1`.
+- `--headless` is used to disable visualization.
 - It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1` (Meanwhile, `--minibatch_size` is recommended to be set as 8×`num_envs`)
 
 
@@ -96,7 +95,7 @@ python skillmimic/run.py --task SkillMimicBallPlay \
 Once the skill policy is learned, we can train a high-level controller to reuse the learned skills to accomplish complex high-level tasks.
 
 ### Inference
-Run the following command.
+The testing command of high-level tasks is in the following format: 
 ```
 python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16 \
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
@@ -107,7 +106,7 @@ python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16 \
 ```
 - You may change the target position by clicking your mouse by add `--projtype Mouse`.
   
-Pre-trained models for the different tasks can be run using the following commands:
+Here are specific commands for testing 4 tasks:
 
 Circling:
 ```
@@ -150,7 +149,7 @@ python skillmimic/run.py --test --task HRLScoringLayup --num_envs 1 --projtype M
 ```
 
 ### Training
-To train the task policy, run the following command: 
+The training command of high-level tasks is in the following format: 
 ```
 python skillmimic/run.py --task [HRLTaskName] \
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
@@ -158,16 +157,9 @@ python skillmimic/run.py --task [HRLTaskName] \
 --motion_file skillmimic/data/motions/BallPlay-M/[task] \
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```
-- During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
-- `--task` specifies the task that the humanoid should perform.
-- `--cfg_env` specifies the environment configurations for that task, such as number of environments, dataFPS, ect.
-- `--cfg_train` specifies the training configurations for that task, such as learning rate, maximum number of epochs, network settings, ect.
-- `--motion_file` can be changed to train a different task policy on different data, e.g., `--motion_file skillmimic/data/motions/BallPlay-M/skillset_1`.
-- `--llc_checkpoint` specifies the checkpoint to use for the low-level controller. A pre-trained low-level
-controller is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
-- `--headless` is used to disable visualizations.
+- `--llc_checkpoint` specifies the checkpoint for the low-level controller. A pre-trained low-level controller is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
   
-Models for the different tasks can be trained using the following commands:
+Here are specific commands for training 4 tasks:
 
 Circling:
 ```

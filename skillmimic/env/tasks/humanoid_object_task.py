@@ -295,10 +295,8 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody): #metric
         elif self.projtype == 'Mouse':
             # mouse control
             for evt in self.evts:
-
                 if evt.action == "reset" and evt.value > 0:
                     self.gym.set_sim_rigid_body_states(self.sim, self._proj_states, gymapi.STATE_ALL)
-
                 elif (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
                     if evt.action == "mouse_shoot":
                         pos = self.gym.get_viewer_mouse_position(self.viewer)

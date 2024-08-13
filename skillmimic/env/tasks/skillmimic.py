@@ -268,28 +268,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     
     def _update_condition(self):
         for evt in self.evts:
-
-            if (evt.action == "011") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "012") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "013") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "001") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "002") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "031") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "032") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "033") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "034") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            elif (evt.action == "035") and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to(self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-    
+            if evt.action.isdigit() and evt.value > 0:
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+            
     def play_dataset_step(self, time): #Z12
 
         t = time

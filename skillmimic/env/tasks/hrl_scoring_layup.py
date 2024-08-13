@@ -246,10 +246,10 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
             # Draw goal position as a small line segment (point)
             point_color = np.array([[0.0, 1.0, 0.0]], dtype=np.float32) if self.reached_target[i] else point_color
             goal_pos = goal_positions[i]
-            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]-0.25, 2., goal_pos[0] + 0.25, goal_pos[1] + 0.25, 2.], dtype=np.float32)
+            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]-0.25, 2.6, goal_pos[0] + 0.25, goal_pos[1] + 0.25, 2.6], dtype=np.float32)
             goal_verts = goal_verts.reshape([1, 6])
             self.gym.add_lines(self.viewer, env_ptr, goal_verts.shape[0], goal_verts, point_color)
-            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]+0.25, 2., goal_pos[0] + 0.25, goal_pos[1] - 0.25, 2.], dtype=np.float32)
+            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]+0.25, 2.6, goal_pos[0] + 0.25, goal_pos[1] - 0.25, 2.6], dtype=np.float32)
             goal_verts = goal_verts.reshape([1, 6])
             self.gym.add_lines(self.viewer, env_ptr, goal_verts.shape[0], goal_verts, point_color)
 
@@ -267,7 +267,7 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
                     self.reached_target[:] = False
                 print(evt.action)
         return
-    
+
     def get_num_amp_obs(self):
         return 323 + len(self.cfg["env"]["keyBodies"])*3 + 6  #0
     

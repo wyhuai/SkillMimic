@@ -382,13 +382,6 @@ class HumanoidWholeBody(BaseTask):
         # print(f'step: {int(self.progress_buf[0])}, reward: {float(self.rew_buf[0]):.10f}')
         
         self.extras["terminate"] = self._terminate_buf 
-        # self.extras["accuracy"] = self.accuracy_buf #metric zqh
-        # self.extras["mpjpe_b"] = self.mpjpe_body_buf
-        # self.extras["mpjpe_o"] = self.mpjpe_ball_buf
-        # self.extras["cg_error"] = self.contact_error_buf
-        # self.extras["succ"] = self.succ_buf.to(torch.float)
-        
-
         # debug viz
         if self.viewer and self.debug_viz:
             self._update_debug_viz()
@@ -396,116 +389,6 @@ class HumanoidWholeBody(BaseTask):
         return
     
     def _update_proj(self):
-        print('################')
-        if self.projtype == 'Auto':
-            curr_timestep = self.progress_buf.cpu().numpy()[0]
-            curr_timestep = curr_timestep % (self._perturb_timesteps[-1] + 1)
-            perturb_step = np.where(self._perturb_timesteps == curr_timestep)[0]
-            
-            if (len(perturb_step) > 0):
-                perturb_id = perturb_step[0]
-                n = self.num_envs
-                humanoid_root_pos = self._humanoid_root_states[..., 0:3]
-
-                rand_theta = torch.rand([n], dtype=self._proj_states.dtype, device=self._proj_states.device)
-                rand_theta *= 2 * np.pi
-                rand_dist = (self._proj_dist_max - self._proj_dist_min) * torch.rand([n], dtype=self._proj_states.dtype, device=self._proj_states.device) + self._proj_dist_min
-                pos_x = rand_dist * torch.cos(rand_theta)
-                pos_y = -rand_dist * torch.sin(rand_theta)
-                pos_z = (self._proj_h_max - self._proj_h_min) * torch.rand([n], dtype=self._proj_states.dtype, device=self._proj_states.device) + self._proj_h_min
-                
-                self._proj_states[..., perturb_id, 0] = humanoid_root_pos[..., 0] + pos_x
-                self._proj_states[..., perturb_id, 1] = humanoid_root_pos[..., 1] + pos_y
-                self._proj_states[..., perturb_id, 2] = pos_z
-                self._proj_states[..., perturb_id, 3:6] = 0.0
-                self._proj_states[..., perturb_id, 6] = 1.0
-                
-                tar_body_idx = np.random.randint(self.num_bodies)
-                tar_body_idx = 1
-
-                launch_tar_pos = self._rigid_body_pos[..., tar_body_idx, :]
-                launch_dir = launch_tar_pos - self._proj_states[..., perturb_id, 0:3]
-                launch_dir += 0.1 * torch.randn_like(launch_dir)
-                launch_dir = torch.nn.functional.normalize(launch_dir, dim=-1)
-                launch_speed = (self._proj_speed_max - self._proj_speed_min) * torch.rand_like(launch_dir[:, 0:1]) + self._proj_speed_min
-                launch_vel = launch_speed * launch_dir
-                launch_vel[..., 0:2] += self._rigid_body_vel[..., tar_body_idx, 0:2]
-                self._proj_states[..., perturb_id, 7:10] = launch_vel
-                self._proj_states[..., perturb_id, 10:13] = 0.0
-
-                self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
-                                                             gymtorch.unwrap_tensor(self._proj_actor_ids),
-                                                             len(self._proj_actor_ids))
-            
-        elif self.projtype == 'Mouse':
-            # mouse control
-            for evt in self.gym.query_viewer_action_events(self.viewer):
-
-                if evt.action == "pick" and evt.value > 0:
-                    # self.gym.set_sim_rigid_body_states(self.sim, self._proj_states, gymapi.STATE_ALL)
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(1).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(0.2).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                    self.control_signal = 1
-
-                elif (evt.action == "layup") and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(2).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(1.4).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                    self.control_signal = 7
-
-                elif (evt.action == "rrun") and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(3).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(1.0).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-
-                elif (evt.action == "run") and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(4).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(0.6).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                
-                elif (evt.action == "getup") and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(5).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(0.6).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size) 
-                    self.control_signal = 0
-
-                elif (evt.action == "shot_down") and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(3).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(1.0).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size)
-                    self.control_signal = 5
-
-                elif (evt.action == "shot_up") and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(4).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                    # self.hoi_data_label_batch = torch.tensor(0.6).to("cuda").repeat(self.hoi_data_label_batch.shape[0],self.condition_size)
-                    self.control_signal = 6
-                
-                
-                elif (evt.action == "RunL") and evt.value > 0:
-                    self.control_signal = 2 #1
-                elif (evt.action == "RunR") and evt.value > 0:
-                    self.control_signal = 3 #2
-                elif (evt.action == "Run") and evt.value > 0:
-                    self.control_signal = 4 #3
-                elif (evt.action == "2Run") and evt.value > 0:
-                    self.control_signal = 9 #1
-                elif (evt.action == "SHOT") and evt.value > 0:
-                    self.control_signal = 8 #3
-                elif evt.action.isdigit() and evt.value > 0:
-                    self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-                
-
-                elif (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
-                    if evt.action == "mouse_shoot":
-                        pos = self.gym.get_viewer_mouse_position(self.viewer)
-                        window_size = self.gym.get_viewer_size(self.viewer)
-                        xcoord = round(pos.x * window_size.x)
-                        ycoord = round(pos.y * window_size.y)
-                        print(f"Fired projectile with mouse at coords: {xcoord} {ycoord}")
-
-                    n = self.num_envs
-                    x = torch.rand(n).to("cuda")*6 + 2
-                    y = torch.rand(n).to("cuda")*6 + 2
-                    self._goal_position[:, 0] = self._humanoid_root_states[:, 0]+x
-                    self._goal_position[:, 1] = self._humanoid_root_states[:, 1]+y                   
-                    self.reached_target[:] = False
-
-                print(evt.action)
         return
     
     def _compute_reward(self, actions):

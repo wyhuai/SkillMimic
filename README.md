@@ -101,18 +101,15 @@ python skillmimic/run.py --task HRLHookshot --cfg_env skillmimic/data/cfg/skillm
 ## References
 If you find this repository useful for your research, please cite the following work.
 ```
-@article{wang2023physhoi,
-  author    = {Wang, Yinhuai and Lin, Jing and Zeng, Ailing and Luo, Zhengyi and Zhang, Jian and Zhang, Lei},
-  title     = {PhysHOI: Physics-Based Imitation of Dynamic Human-Object Interaction},
-  journal   = {arXiv preprint arXiv:2312.04393},
-  year      = {2023},
+@article{wang2024skillmimic,
+author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Lin, Jing and Luo, Zhengyi and Tsui, Hok Wai and Yu, Jiwen and Li, Xiu and Chen, Qifeng and Zhang, Jian and Zhang, Lei and Tan Ping},
+  title     = {SkillMimic: Learning Reusable Basketball Skills from Demonstrations},
+  journal   = {arXiv preprint arXiv:000000000},
+  year      = {2024},
 }
 ```
 The code implementation is based on ASE and PhysHOI:
 - https://github.com/nv-tlabs/ASE
 - https://github.com/wyhuai/PhysHOI
-
-The SMPL-X humanoid robot is generated using UHC:
-- https://github.com/ZhengyiLuo/UniversalHumanoidControl
 
 

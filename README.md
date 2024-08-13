@@ -84,9 +84,9 @@ python skillmimic/run.py --task SkillMimicBallPlay
 --motion_file skillmimic/data/motions/BallPlay-M/[skill] --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
-- `--task` specifies the task that the humanoid should perform.
-- `--cfg_env` specifies the environment configurations for that task, such as number of environments, dataFPS, ball properties, ect.
-- `--cfg_train` specifies the training configurations for that task, such as learning rate, maximum number of epochs, network settings, ect.
+- `--task` specifies the skill that the humanoid should perform.
+- `--cfg_env` specifies the environment configurations for that skill, such as number of environments, dataFPS, ball properties, ect.
+- `--cfg_train` specifies the training configurations for that skill, such as learning rate, maximum number of epochs, network settings, ect.
 - `--motion_file` can be changed to train a different skill policy on different data, e.g., `--motion_file skillmimic/data/motions/BallPlay-M/skillset_1`.
 - `--headless` is used to disable visualizations.
 - It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1` (Meanwhile, `--minibatch_size` is recommended to be set as 8×`num_envs`)
@@ -154,7 +154,7 @@ To train the task policy, run the following command:
 ```
 python skillmimic/run.py --task [HRLTaskName]
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/[configFile]
 --motion_file skillmimic/data/motions/BallPlay-M/[task]
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless
@@ -174,7 +174,7 @@ Circling:
 ```
 python skillmimic/run.py --task HRLCircling
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
---cfg_train skillmimic/data/cfg/train/rlg/circling
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml
 --motion_file skillmimic/data/motions/BallPlay-M/circling
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless

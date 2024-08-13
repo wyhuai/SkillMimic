@@ -189,7 +189,7 @@ python skillmimic/run.py --task HRLHeadingEasy \
 
 Throwing:
 ```
-python skillmimic/run.py --task HRLThrowing
+python skillmimic/run.py --task HRLThrowing \
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml \
 --motion_file skillmimic/data/motions/BallPlay-M/turnhook \

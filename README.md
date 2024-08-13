@@ -51,7 +51,7 @@ If you can see the pop-up interface, it means the installation is successful.
 
 
 ## Pre-Trained Models
-A pre-trained SkillMimic low-level controller is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
+A pre-trained skill policy is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
 
 ## Skill Policy ⛹️‍♂️
 The skill policy can be trained purely from demonstrations, without the need for designing case-by-case skill rewards. Our method allows a single policy to learn a large variety of basketball skills from a dataset that contains diverse skills. 
@@ -59,11 +59,14 @@ The skill policy can be trained purely from demonstrations, without the need for
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[skill] --checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
+python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16
+--cfg_env skillmimic/data/cfg/skillmimic.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[skill]
+--checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
 ```
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
 `Q: pick up`, `W: shot`, `←: dribble left`, `↑: dribble forward`, `→: dribble right`, `E: layup`, `R: turnaround layup`.
-
 - You may change `--motion_file` to alter the initialization, or add `--state_init frame_number` to initialize from a specific reference state (Default: random reference state initialization).
 - To view the HOI dataset, add `--play_dataset`.
 - To save the images, add `--save_images test_images` to the command, and the images will be saved in `skillmimic/data/images/test_images`.
@@ -75,11 +78,16 @@ python skillmimic/utils/make_video.py --image_path skillmimic/data/images/test_i
 ### Training
 To train the skill policy, run the following command: 
 ```
-python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[skill] --headless
+python skillmimic/run.py --task SkillMimicBallPlay
+--cfg_env skillmimic/data/cfg/skillmimic.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[skill] --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
 - You may change the `--motion_file` to train a different skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
+- `--headless` is used to disable visualizations.
 - It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1` (Meanwhile, `--minibatch_size` is recommended to be set as 8×`num_envs`)
+
 
 ## High-Level Controller ⛹️‍♂️
 Once the skill policy is learned, we can train a high-level controller to reuse the learned skills to accomplish complex high-level tasks.
@@ -94,50 +102,50 @@ python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16
 --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
+
 - You may change the target position by clicking your mouse.
   
 Pre-trained models for the different tasks can be run using the following commands:
 
-HRLCircling:
+Circling:
 ```
 python skillmimic/run.py --test --task HRLCircling --num_envs 16
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml
 --motion_file skillmimic/data/motions/BallPlay-M/circling
---checkpoint skillmimic/data/models/ circling /nn/SkillMimic.pth
+--checkpoint skillmimic/data/models/circling/nn/SkillMimic.pth
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
-HRLHeadingEasy:
+Heading:
 ```
 python skillmimic/run.py --test --task HRLHeadingEasy --num_envs 16
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml
---motion_file skillmimic/data/motions/BallPlay-M/[task]
---checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--motion_file skillmimic/data/motions/BallPlay-M/heading
+--checkpoint skillmimic/data/models/heading/nn/SkillMimic.pth
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
-HRLHookshot:
+Hook Shot:
 ```
 python skillmimic/run.py --test --task HRLHookshot --num_envs 16
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml
---motion_file skillmimic/data/motions/BallPlay-M/[task]
---checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--motion_file skillmimic/data/motions/BallPlay-M/hookshot
+--checkpoint skillmimic/data/models/hookshot/nn/SkillMimic.pth
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
-HRLScoringLayup
+Scoring Layup
 ```
 python skillmimic/run.py --test --task HRLScoringLayup --num_envs 16
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml
---motion_file skillmimic/data/motions/BallPlay-M/[task]
---checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--motion_file skillmimic/data/motions/BallPlay-M/scoringlayup
+--checkpoint skillmimic/data/models/scoringlayup/nn/SkillMimic.pth
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
-
 
 ### Training
 To train the task policy, run the following command: 
@@ -145,48 +153,52 @@ To train the task policy, run the following command:
 python skillmimic/run.py --task [HRLTaskName]
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml
---motion_file skillmimic/data/motions/BallPlay/[task]
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
---headless
-```
-Models for the different tasks can be trained using the following commands:
-
-HRLCircling:
-```
-python skillmimic/run.py --task HRLCircling
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
---cfg_train skillmimic/data/cfg/train/rlg/[configFile]
 --motion_file skillmimic/data/motions/BallPlay-M/[task]
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless
 ```
+- During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
+- You may change the `--motion_file` to train a different skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
+- `--headless` is used to disable visualizations.
+  
+Models for the different tasks can be trained using the following commands:
 
-HRLHeadingEasy
+Circling:
+```
+python skillmimic/run.py --task HRLCircling
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/circling
+--motion_file skillmimic/data/motions/BallPlay-M/circling
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
+```
+
+Heading
 ```
 python skillmimic/run.py --task HRLHeadingEasy
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml
---motion_file skillmimic/data/motions/BallPlay-M/[task]
+--motion_file skillmimic/data/motions/BallPlay-M/heading
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless
 ```
 
-HRLHookshot
+Hook Shot
 ```
 python skillmimic/run.py --task HRLHookshot
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml
---motion_file skillmimic/data/motions/BallPlay-M/[task]
+--motion_file skillmimic/data/motions/BallPlay-M/hookshot
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless
 ```
 
-HRLScoringLayup
+Scoring Layup
 ```
 python skillmimic/run.py --task HRLScoringLayup
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml
---motion_file skillmimic/data/motions/BallPlay-M/[task]
+--motion_file skillmimic/data/motions/BallPlay-M/scoringlayup
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless
 ```
@@ -206,5 +218,6 @@ author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Li
 The code implementation is based on ASE and PhysHOI:
 - https://github.com/nv-tlabs/ASE
 - https://github.com/wyhuai/PhysHOI
+
 
 

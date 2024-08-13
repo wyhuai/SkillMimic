@@ -157,10 +157,9 @@ class HRLCircling(HumanoidWholeBodyWithObject):
         if(len(env_ids)>0):
             n = len(env_ids)
 
-            self._goal_position[env_ids, 0] = self._humanoid_root_states[env_ids, 0]#+x
-            self._goal_position[env_ids, 1] = self._humanoid_root_states[env_ids, 1]#+y
-
-            self._goal_radius[env_ids, :] = torch.rand(n,1).to("cuda")*5 + 1 #torch.ones_like(self._goal_radius[env_ids, :]).to("cuda")*3
+            self._goal_position[env_ids, 0] = self._humanoid_root_states[env_ids, 0]
+            self._goal_position[env_ids, 1] = self._humanoid_root_states[env_ids, 1]
+            self._goal_radius[env_ids, :] = torch.rand(n,1).to("cuda")*3 + 2
 
             self.reached_target[env_ids] = False
 
@@ -250,17 +249,16 @@ class HRLCircling(HumanoidWholeBodyWithObject):
 
     
     def _update_proj(self):
-            
+        # mouse control
         if self.projtype == 'Mouse':
-            # mouse control
-            for evt in self.evts: #V1
-
+            for evt in self.evts:
                 if (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
-
-                    n = self.num_envs
-                    self._goal_radius[:, :] = torch.rand(n,1).to("cuda")*5                   
+                    x = torch.rand(self.num_envs).to("cuda")*6 + 2
+                    y = torch.rand(self.num_envs).to("cuda")*6 + 2
+                    self._goal_position[:, 0] = self._humanoid_root_states[:, 0]+x
+                    self._goal_position[:, 1] = self._humanoid_root_states[:, 1]+y
+                    self._goal_radius[:, :] = torch.rand(self.num_envs,1).to("cuda")*3 + 2                 
                     self.reached_target[:] = False
-
                 print(evt.action)
         return
     

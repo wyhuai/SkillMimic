@@ -30,7 +30,7 @@ from env.tasks.vec_task_wrappers import VecTaskPythonWrapper
 from env.tasks.skillmimic import SkillMimicBallPlay
 from env.tasks.hrl_circling import HRLCircling
 from env.tasks.hrl_heading_easy import HRLHeadingEasy
-from env.tasks.hrl_hookshot import HRLHookshot
+from env.tasks.hrl_throwing import HRLThrowing
 from env.tasks.hrl_scoring_layup import HRLScoringLayup
 
 from isaacgym import rlgpu

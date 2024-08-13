@@ -43,7 +43,7 @@ from env.tasks.humanoid_object_task import HumanoidWholeBodyWithObject
 TAR_ACTOR_ID = 1
 TAR_FACING_ACTOR_ID = 2
 
-class HRLHookshot(HumanoidWholeBodyWithObject):
+class HRLThrowing(HumanoidWholeBodyWithObject):
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
         state_init = str(cfg["env"]["stateInit"])
         if state_init.lower() == "random":

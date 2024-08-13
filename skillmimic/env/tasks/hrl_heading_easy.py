@@ -234,13 +234,26 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
             # Draw goal position as a small line segment (point)
             point_color = np.array([[0.0, 1.0, 0.0]], dtype=np.float32) if self.reached_target[i] else point_color
             goal_pos = goal_positions[i]
-            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]-0.25, 0.8, goal_pos[0] + 0.25, goal_pos[1] + 0.25, 0.8], dtype=np.float32)
+            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]-0.25, 1.0, goal_pos[0] + 0.25, goal_pos[1] + 0.25, 1.0], dtype=np.float32)
             goal_verts = goal_verts.reshape([1, 6])
             self.gym.add_lines(self.viewer, env_ptr, goal_verts.shape[0], goal_verts, point_color)
-            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]+0.25, 0.8, goal_pos[0] + 0.25, goal_pos[1] - 0.25, 0.8], dtype=np.float32)
+            goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]+0.25, 1.0, goal_pos[0] + 0.25, goal_pos[1] - 0.25, 1.0], dtype=np.float32)
             goal_verts = goal_verts.reshape([1, 6])
             self.gym.add_lines(self.viewer, env_ptr, goal_verts.shape[0], goal_verts, point_color)
 
+        return
+    
+    def _update_proj(self):
+        # mouse control
+        if self.projtype == 'Mouse':
+            for evt in self.gym.query_viewer_action_events(self.viewer):
+                if (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
+                    x = torch.rand(self.num_envs).to("cuda")*6 + 2
+                    y = torch.rand(self.num_envs).to("cuda")*6 + 2
+                    self._goal_position[:, 0] = self._humanoid_root_states[:, 0]+x
+                    self._goal_position[:, 1] = self._humanoid_root_states[:, 1]+y                   
+                    self.reached_target[:] = False
+                print(evt.action)
         return
     
     def get_num_amp_obs(self):

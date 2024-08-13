@@ -239,17 +239,12 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
         return obs
 
     def _draw_task(self):
-
         point_color = np.array([[1.0, 0.0, 0.0]], dtype=np.float32)  # Red for goal position
-
         self.gym.clear_lines(self.viewer)
-
         goal_positions = self._goal_position.cpu().numpy()
-
         for i, env_ptr in enumerate(self.envs):
             # Draw goal position as a small line segment (point)
-            if self.reached_target[i]:
-                point_color = np.array([[0.0, 1.0, 0.0]], dtype=np.float32)
+            point_color = np.array([[0.0, 1.0, 0.0]], dtype=np.float32) if self.reached_target[i] else point_color
             goal_pos = goal_positions[i]
             goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]-0.25, 2., goal_pos[0] + 0.25, goal_pos[1] + 0.25, 2.], dtype=np.float32)
             goal_verts = goal_verts.reshape([1, 6])
@@ -260,6 +255,19 @@ class HRLScoringLayup(HumanoidWholeBodyWithObject):
 
         return
 
+    def _update_proj(self):
+        # mouse control
+        if self.projtype == 'Mouse':
+            for evt in self.gym.query_viewer_action_events(self.viewer):
+                if (evt.action == "space_shoot" or evt.action == "mouse_shoot") and evt.value > 0:
+                    x = torch.rand(self.num_envs).to("cuda")*6 + 2
+                    y = torch.rand(self.num_envs).to("cuda")*6 + 2
+                    self._goal_position[:, 0] = self._humanoid_root_states[:, 0]+x
+                    self._goal_position[:, 1] = self._humanoid_root_states[:, 1]+y                   
+                    self.reached_target[:] = False
+                print(evt.action)
+        return
+    
     def get_num_amp_obs(self):
         return 323 + len(self.cfg["env"]["keyBodies"])*3 + 6  #0
     

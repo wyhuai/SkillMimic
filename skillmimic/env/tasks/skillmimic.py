@@ -110,7 +110,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         if self._enable_task_obs:
             task_obs = self.compute_task_obs(env_ids)
             obs = torch.cat([obs, task_obs], dim = -1)
-
+        # print("kkkkkkkkkkkkkk",self.hoi_data_label_batch)
         if (env_ids is None): #Z
             textemb_batch = self.hoi_data_label_batch
             obs = torch.cat((obs,textemb_batch),dim=-1)
@@ -167,16 +167,16 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
 
     def _subscribe_events_for_change_condition(self):
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_A, "011")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_S, "012")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_D, "013")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_F, "001")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_G, "002")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_Z, "031")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_X, "032")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_C, "033")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_V, "034")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_B, "035")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_LEFT, "011") # dribble left
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_RIGHT, "012") # dribble right
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_UP, "013") # dribble forward
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_Q, "001") # pick up
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_W, "002") # shot
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_E, "031") # layup
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_X, "032") #
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_C, "033") #
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_R, "034") # turnaround layup
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_B, "035") #
         
         return
     

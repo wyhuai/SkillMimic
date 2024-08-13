@@ -23,7 +23,8 @@ skillmimic/data/motions/*
 skillmimic/data/motions/BallPlay-M_0712/pick
 !skillmimic/data/motions/turnhook
 skillmimic/data/models/*
-!skillmimic/data/models/UAS-smooth
+# !skillmimic/data/models/UAS-smooth
+!skillmimic/data/models/mixedskills
 
 skillmimic/env/tasks/ase.py
 skillmimic/env/tasks/hrl_circling.BAK.py

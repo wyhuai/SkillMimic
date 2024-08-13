@@ -1,5 +1,5 @@
 # SkillMimic
-[Paper](https://github.com/wyhuai/SkillMimic) | [Project Page](https://github.com/wyhuai/SkillMimic) | [Video](https://github.com/wyhuai/SkillMimic)
+[Paper](https://github.com/wyhuai/SkillMimic) | [Project Page](https://ingrid789.github.io/SkillMimic/) | [Video](https://youtu.be/j1smsXilUGM)
 
 Official code release for the following paper:
 "**SkillMimic: Learning Reusable Basketball Skills from Demonstrations**"
@@ -13,9 +13,9 @@ continuous scoring (green), which involves dribbling toward the basket, timing t
 
 - [ ] Release the complete raw BallPlay-M dataset and the data processing code.
 
-- [x] Release a subset of the BallPlay-M dataset.
+- [ ] Release a subset of the BallPlay-M dataset.
 
-- [x] Release training and evaluation code.
+- [ ] Release training and evaluation code.
 
 ## Installation 💽
 
@@ -51,19 +51,20 @@ If you can see the pop-up interface, it means the installation is successful.
 
 
 ## Pre-Trained Models
-Download the pre-trained models from here [link](https://??), unzip the files, and put them into `skillmimic/data/models/`. The directory structure should be like `skillmimic/data/models/mixedskills/nn/SkillMimic.pth`, etc.
+A pre-trained SkillMimic low-level controller is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
 
 ## Skill Policy ⛹️‍♂️
 The skill policy can be trained purely from demonstrations, without the need for designing case-by-case skill rewards. Our method allows a single policy to learn a large variety of basketball skills from a dataset that contains diverse skills. 
+
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[skill] --checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
 ```
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
-`F: pick up`, `G: shot`, `A: dribble left`, `D: dribble forward`, `S: dribble right`, `Z: layup`, `V: turnaround layup`.
+`Q: pick up`, `W: shot`, `←: dribble left`, `↑: dribble forward`, `→: dribble right`, `E: layup`, `R: turnaround layup`.
 
-- You may change `--motion_file` to alter the initialization, or add `--state_init` to disable random initialization.
+- You may change `--motion_file` to alter the initialization, or add `--state_init frame_number` to initialize from a specific reference state (Default: random reference state initialization).
 - To view the HOI dataset, add `--play_dataset`.
 - To save the images, add `--save_images test_images` to the command, and the images will be saved in `skillmimic/data/images/test_images`.
 - To transform the images into a video, run the following command, and the video can be found in `skillmimic/data/videos`.
@@ -74,11 +75,11 @@ python skillmimic/utils/make_video.py --image_path skillmimic/data/images/test_i
 ### Training
 To train the skill policy, run the following command: 
 ```
-python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss --headless
+python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[skill] --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
-- You may change the `--motion_file` to train skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
-- It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1`
+- You may change the `--motion_file` to train a different skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
+- It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1` (Meanwhile, `--minibatch_size` is recommended to be set as 8×`num_envs`)
 
 ## High-Level Controller ⛹️‍♂️
 Once the skill policy is learned, we can train a high-level controller to reuse the learned skills to accomplish complex high-level tasks.
@@ -86,14 +87,25 @@ Once the skill policy is learned, we can train a high-level controller to reuse 
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task HRLHookshot --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/[configFile]
+--motion_file skillmimic/data/motions/BallPlay/[task]
+--checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 - You may change the target position by clicking your mouse.
+
 
 ### Training
 To train the task policy, run the following command: 
 ```
-python skillmimic/run.py --task HRLHookshot --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss.pt --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --headless
+python skillmimic/run.py --task [HRLTaskName]
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/[configFile]
+--motion_file skillmimic/data/motions/BallPlay/[task]
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
 ```
 
 ### The BallPlay dataset 🏀
@@ -101,18 +113,15 @@ python skillmimic/run.py --task HRLHookshot --cfg_env skillmimic/data/cfg/skillm
 ## References
 If you find this repository useful for your research, please cite the following work.
 ```
-@article{wang2023physhoi,
-  author    = {Wang, Yinhuai and Lin, Jing and Zeng, Ailing and Luo, Zhengyi and Zhang, Jian and Zhang, Lei},
-  title     = {PhysHOI: Physics-Based Imitation of Dynamic Human-Object Interaction},
-  journal   = {arXiv preprint arXiv:2312.04393},
-  year      = {2023},
+@article{wang2024skillmimic,
+author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Lin, Jing and Luo, Zhengyi and Tsui, Hok Wai and Yu, Jiwen and Li, Xiu and Chen, Qifeng and Zhang, Jian and Zhang, Lei and Tan Ping},
+  title     = {SkillMimic: Learning Reusable Basketball Skills from Demonstrations},
+  journal   = {arXiv preprint arXiv:000000000},
+  year      = {2024},
 }
 ```
 The code implementation is based on ASE and PhysHOI:
 - https://github.com/nv-tlabs/ASE
 - https://github.com/wyhuai/PhysHOI
-
-The SMPL-X humanoid robot is generated using UHC:
-- https://github.com/ZhengyiLuo/UniversalHumanoidControl
 
 

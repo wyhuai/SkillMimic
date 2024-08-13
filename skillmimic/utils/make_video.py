@@ -15,5 +15,6 @@ image_files.sort()
 clip = ImageSequenceClip(image_files, fps=args.fps)
 
 data_name = image_folder[len('skillmimic/data/images/'):] #projectname
-out_path = 'skillname/data/videos/' + data_name + '.mp4' #projectname
+os.makedirs("skillmimic/data/videos/", exist_ok=True)
+out_path = 'skillmimic/data/videos/' + data_name + '.mp4' #projectname
 clip.write_videofile(out_path) 

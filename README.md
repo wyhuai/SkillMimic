@@ -95,6 +95,48 @@ python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 - You may change the target position by clicking your mouse.
+  
+Pre-trained models for the different tasks can be run using the following commands:
+
+HRLCircling:
+```
+python skillmimic/run.py --test --task HRLCircling --num_envs 16
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/circling
+--checkpoint skillmimic/data/models/ circling /nn/SkillMimic.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+```
+
+HRLHeadingEasy:
+```
+python skillmimic/run.py --test --task HRLHeadingEasy --num_envs 16
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+
+
+HRLHookshot:
+```
+python skillmimic/run.py --test --task HRLHookshot --num_envs 16
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+```
+
+HRLScoringLayup
+```
+python skillmimic/run.py --test --task HRLScoringLayup --num_envs 16
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+```
 
 
 ### Training
@@ -102,12 +144,52 @@ To train the task policy, run the following command:
 ```
 python skillmimic/run.py --task [HRLTaskName]
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
---cfg_train skillmimic/data/cfg/train/rlg/[configFile]
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml
 --motion_file skillmimic/data/motions/BallPlay/[task]
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 --headless
 ```
+Models for the different tasks can be trained using the following commands:
 
+HRLCircling:
+```
+python skillmimic/run.py --task HRLCircling
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/[configFile]
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
+```
+
+HRLHeadingEasy
+```
+python skillmimic/run.py --task HRLHeadingEasy
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
+```
+
+HRLHookshot
+```
+python skillmimic/run.py --task HRLHookshot
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
+```
+
+HRLScoringLayup
+```
+python skillmimic/run.py --task HRLScoringLayup
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
+```
 ### The BallPlay dataset 🏀
 
 ## References

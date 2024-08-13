@@ -78,8 +78,8 @@ To train the skill policy, run the following command:
 python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[skill] --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
-- You may change the `--motion_file` to train skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
-- It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1`
+- You may change the `--motion_file` to train a different skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
+- It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1` (Meanwhile, `--minibatch_size` is recommended to be set as 8×`num_envs`)
 
 ## High-Level Controller ⛹️‍♂️
 Once the skill policy is learned, we can train a high-level controller to reuse the learned skills to accomplish complex high-level tasks.
@@ -87,23 +87,25 @@ Once the skill policy is learned, we can train a high-level controller to reuse 
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task HRLHookshot --num_envs 16
+python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml
---motion_file skillmimic/data/motions/turnhook
+--cfg_train skillmimic/data/cfg/train/rlg/[configFile]
+--motion_file skillmimic/data/motions/BallPlay/[task]
 --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
---llc_checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 - You may change the target position by clicking your mouse.
+
 
 ### Training
 To train the task policy, run the following command: 
 ```
-python skillmimic/run.py --task HRLHookshot
---cfg_env skillmimic/data/cfg/skillmimic.yaml
---cfg_train skillmimic/data/cfg/train/rlg/skillmimic_hlc.yaml
+python skillmimic/run.py --task [HRLTaskName]
+--cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
+--cfg_train skillmimic/data/cfg/train/rlg/[configFile]
 --motion_file skillmimic/data/motions/BallPlay/[task]
---llc_checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth --headless
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--headless
 ```
 
 ### The BallPlay dataset 🏀

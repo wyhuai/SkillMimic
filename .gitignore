@@ -18,11 +18,11 @@ skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_llcs.yaml
 __pycache__/
 *.py[cod]
 
-skillmimic/data/motions/*
-!skillmimic/data/motions/BallPlay-M_0712/
-skillmimic/data/motions/BallPlay-M_0712/pick
-!skillmimic/data/motions/turnhook
-skillmimic/data/models/*
+# skillmimic/data/motions/*
+# !skillmimic/data/motions/BallPlay-M_0712/
+# skillmimic/data/motions/BallPlay-M_0712/pick
+# !skillmimic/data/motions/turnhook
+# skillmimic/data/models/*
 # !skillmimic/data/models/UAS-smooth
 !skillmimic/data/models/mixedskills
 

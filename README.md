@@ -104,7 +104,7 @@ python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16 \
 --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth \
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
-- You may change the target position by clicking your mouse by add `--projtype Mouse`.
+- You may change the target position by clicking your mouse by adding `--projtype Mouse`.
   
 Here are specific commands for testing 4 tasks:
 

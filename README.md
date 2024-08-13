@@ -51,7 +51,7 @@ If you can see the pop-up interface, it means the installation is successful.
 
 
 ## Pre-Trained Models
-A pre-trained skill policy is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
+Pre-trained models are available at `skillmimic/data/models/`
 
 ## Skill Policy ⛹️‍♂️
 The skill policy can be trained purely from demonstrations, without the need for designing case-by-case skill rewards. Our method allows a single policy to learn a large variety of basketball skills from a dataset that contains diverse skills. 
@@ -123,7 +123,7 @@ Throwing:
 python skillmimic/run.py --test --task HRLThrowing --num_envs 1 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml --motion_file skillmimic/data/motions/BallPlay-M/turnhook --checkpoint skillmimic/data/models/hlc_throwing/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
-Scoring Layup
+Scoring
 ```
 python skillmimic/run.py --test --task HRLScoringLayup --num_envs 1 --projtype Mouse --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --checkpoint skillmimic/data/models/hlc_scoring/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
@@ -162,6 +162,8 @@ python skillmimic/run.py --task HRLScoringLayup --cfg_env skillmimic/data/cfg/sk
 ```
 
 ### The BallPlay dataset 🏀
+A subset is at `skillmimic/data/motions/BallPlay-M/`, full dataset coming soon.
+
 
 ## References
 If you find this repository useful for your research, please cite the following work.

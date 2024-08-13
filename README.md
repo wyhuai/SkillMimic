@@ -1,5 +1,5 @@
 # SkillMimic
-[Paper](https://github.com/wyhuai/SkillMimic) | [Project Page](https://github.com/wyhuai/SkillMimic) | [Video](https://github.com/wyhuai/SkillMimic)
+[Paper](https://github.com/wyhuai/SkillMimic) | [Project Page](https://ingrid789.github.io/SkillMimic/) | [Video](https://github.com/wyhuai/SkillMimic)
 
 Official code release for the following paper:
 "**SkillMimic: Learning Reusable Basketball Skills from Demonstrations**"
@@ -58,12 +58,12 @@ The skill policy can be trained purely from demonstrations, without the need for
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/[skill] --checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
 ```
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
-`F: pick up`, `G: shot`, `A: dribble left`, `D: dribble forward`, `S: dribble right`, `Z: layup`, `V: turnaround layup`.
+Q: pick up`, `W: shot`, `←: dribble left`, `↑: dribble forward`, `→: dribble right`, `E: layup`, `R: turnaround layup`.
 
-- You may change `--motion_file` to alter the initialization, or add `--state_init` to disable random initialization.
+- You may change `--motion_file` to alter the initialization, or add `--state_init frame_number` to disable random initialization.
 - To view the HOI dataset, add `--play_dataset`.
 - To save the images, add `--save_images test_images` to the command, and the images will be saved in `skillmimic/data/images/test_images`.
 - To transform the images into a video, run the following command, and the video can be found in `skillmimic/data/videos`.
@@ -74,7 +74,7 @@ python skillmimic/utils/make_video.py --image_path skillmimic/data/images/test_i
 ### Training
 To train the skill policy, run the following command: 
 ```
-python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss --headless
+python skillmimic/run.py --task SkillMimicBallPlay --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[skill] --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
 - You may change the `--motion_file` to train skill policy on different data, e.g., `--motion_file skillmimic/data/motions/skillset_1`.
@@ -86,14 +86,14 @@ Once the skill policy is learned, we can train a high-level controller to reuse 
 ### Inference
 Run the following command.
 ```
-python skillmimic/run.py --test --task HRLHookshot --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
+python skillmimic/run.py --test --task HRLHookshot --num_envs 16 --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
 ```
 - You may change the target position by clicking your mouse.
 
 ### Training
 To train the task policy, run the following command: 
 ```
-python skillmimic/run.py --task HRLHookshot --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/toss.pt --llc_checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth --headless
+python skillmimic/run.py --task HRLHookshot --cfg_env skillmimic/data/cfg/skillmimic.yaml --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml --motion_file skillmimic/data/motions/BallPlay/[task] --llc_checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth --headless
 ```
 
 ### The BallPlay dataset 🏀

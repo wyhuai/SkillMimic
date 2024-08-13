@@ -13,9 +13,9 @@ continuous scoring (green), which involves dribbling toward the basket, timing t
 
 - [ ] Release the complete raw BallPlay-M dataset and the data processing code.
 
-- [ ] Release a subset of the BallPlay-M dataset.
+- [X] Release a subset of the BallPlay-M dataset.
 
-- [ ] Release training and evaluation code.
+- [X] Release training and evaluation code.
 
 ## Installation 💽
 

@@ -133,7 +133,7 @@ Throwing:
 ```
 python skillmimic/run.py --test --task HRLThrowing --num_envs 1 --projtype Mouse \
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml \
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml \
 --motion_file skillmimic/data/motions/BallPlay-M/turnhook \
 --checkpoint skillmimic/data/models/hlc_throwing/nn/SkillMimic.pth \
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
@@ -189,9 +189,9 @@ python skillmimic/run.py --task HRLHeadingEasy \
 
 Throwing:
 ```
-python skillmimic/run.py --task HRLHookshot
+python skillmimic/run.py --task HRLThrowing
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml \
+--cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml \
 --motion_file skillmimic/data/motions/BallPlay-M/turnhook \
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```

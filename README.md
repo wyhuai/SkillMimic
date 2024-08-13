@@ -62,8 +62,8 @@ Run the following command.
 python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 \
 --cfg_env skillmimic/data/cfg/skillmimic.yaml \
 --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/[skill] \
---checkpoint skillmimic/data/models/[skill]/nn/SkillMimic.pth
+--motion_file skillmimic/data/motions/BallPlay-M/layup \
+--checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
 `Q: pick up`, `W: shot`, `←: dribble left`, `↑: dribble forward`, `→: dribble right`, `E: layup`, `R: turnaround layup`.
@@ -81,7 +81,7 @@ To train the skill policy, run the following command:
 python skillmimic/run.py --task SkillMimicBallPlay \
 --cfg_env skillmimic/data/cfg/skillmimic.yaml \
 --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/[skill] --headless
+--motion_file skillmimic/data/motions/BallPlay-M/layup --headless
 ```
 - During the training, the latest checkpoint SkillMimic.pth will be regularly saved to output/, along with a Tensorboard log.
 - `--cfg_env` specifies the environment configurations, such as number of environments, dataFPS, ball properties, etc.
@@ -110,42 +110,22 @@ Here are specific commands for testing 4 tasks:
 
 Circling:
 ```
-python skillmimic/run.py --test --task HRLCircling --num_envs 1 --projtype Mouse \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/run \
---checkpoint skillmimic/data/models/hlc_circling/nn/SkillMimic.pth \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+python skillmimic/run.py --test --task HRLCircling --num_envs 1 --projtype Mouse --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --checkpoint skillmimic/data/models/hlc_circling/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
 Heading:
 ```
-python skillmimic/run.py --test --task HRLHeadingEasy --num_envs 1 --projtype Mouse \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/run \
---checkpoint skillmimic/data/models/hlc_heading/nn/SkillMimic.pth \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+python skillmimic/run.py --test --task HRLHeadingEasy --num_envs 1 --projtype Mouse --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --checkpoint skillmimic/data/models/hlc_heading/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
 Throwing:
 ```
-python skillmimic/run.py --test --task HRLThrowing --num_envs 1 \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/turnhook \
---checkpoint skillmimic/data/models/hlc_throwing/nn/SkillMimic.pth \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+python skillmimic/run.py --test --task HRLThrowing --num_envs 1 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml --motion_file skillmimic/data/motions/BallPlay-M/turnhook --checkpoint skillmimic/data/models/hlc_throwing/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
 Scoring Layup
 ```
-python skillmimic/run.py --test --task HRLScoringLayup --num_envs 1 --projtype Mouse \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/run \
---checkpoint skillmimic/data/models/hlc_scoring/nn/SkillMimic.pth \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+python skillmimic/run.py --test --task HRLScoringLayup --num_envs 1 --projtype Mouse --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --checkpoint skillmimic/data/models/hlc_scoring/nn/SkillMimic.pth --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
 ### Training
@@ -163,38 +143,22 @@ Here are specific commands for training 4 tasks:
 
 Circling:
 ```
-python skillmimic/run.py --task HRLCircling \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/run \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
+python skillmimic/run.py --task HRLCircling --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```
 
 Heading:
 ```
-python skillmimic/run.py --task HRLHeadingEasy \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/run \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
+python skillmimic/run.py --task HRLHeadingEasy --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```
 
 Throwing:
 ```
-python skillmimic/run.py --task HRLThrowing \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/turnhook \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
+python skillmimic/run.py --task HRLThrowing --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_throwing.yaml --motion_file skillmimic/data/motions/BallPlay-M/turnhook --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```
 
 Scoring:
 ```
-python skillmimic/run.py --task HRLScoringLayup \
---cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml \
---cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml \
---motion_file skillmimic/data/motions/BallPlay-M/run \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
+python skillmimic/run.py --task HRLScoringLayup --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```
 
 ### The BallPlay dataset 🏀

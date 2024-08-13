@@ -13,9 +13,9 @@ continuous scoring (green), which involves dribbling toward the basket, timing t
 
 - [ ] Release the complete raw BallPlay-M dataset and the data processing code.
 
-- [x] Release a subset of the BallPlay-M dataset.
+- [ ] Release a subset of the BallPlay-M dataset.
 
-- [x] Release training and evaluation code.
+- [ ] Release training and evaluation code.
 
 ## Installation 💽
 
@@ -51,10 +51,11 @@ If you can see the pop-up interface, it means the installation is successful.
 
 
 ## Pre-Trained Models
-Download the pre-trained models from here [link](https://??), unzip the files, and put them into `skillmimic/data/models/`. The directory structure should be like `skillmimic/data/models/mixedskills/nn/SkillMimic.pth`, etc.
+A pre-trained SkillMimic low-level controller is available in `skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth`
 
 ## Skill Policy ⛹️‍♂️
 The skill policy can be trained purely from demonstrations, without the need for designing case-by-case skill rewards. Our method allows a single policy to learn a large variety of basketball skills from a dataset that contains diverse skills. 
+
 ### Inference
 Run the following command.
 ```
@@ -63,7 +64,7 @@ python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 --cfg_en
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
 `Q: pick up`, `W: shot`, `←: dribble left`, `↑: dribble forward`, `→: dribble right`, `E: layup`, `R: turnaround layup`.
 
-- You may change `--motion_file` to alter the initialization, or add `--state_init frame_number` to disable random initialization.
+- You may change `--motion_file` to alter the initialization, or add `--state_init frame_number` to initialize from a specific reference state (Default: random reference state initialization).
 - To view the HOI dataset, add `--play_dataset`.
 - To save the images, add `--save_images test_images` to the command, and the images will be saved in `skillmimic/data/images/test_images`.
 - To transform the images into a video, run the following command, and the video can be found in `skillmimic/data/videos`.

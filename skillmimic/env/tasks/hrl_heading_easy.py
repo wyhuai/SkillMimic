@@ -169,16 +169,12 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
         self.rew_buf[:] = compute_heading_reward(root_pos, root_vel, ball_pos, self._goal_position)
 
         # for test
-        distance_to_goal = torch.norm(root_pos[:, :2] - self._goal_position, dim=-1)
-        at_target = (distance_to_goal < 0.3)
+        z_dim = torch.ones_like(self._goal_position[:,:1])
+        goal_position = torch.cat([self._goal_position, z_dim], dim=-1)
+        distance_to_goal = torch.norm(ball_pos - goal_position, dim=-1)
+        at_target = (distance_to_goal < 0.5) # < 0.3
         self.reached_target = self.reached_target | at_target
-        # print(root_pos[0, :2], self._goal_position)
-        # print('reward:', f'{float(self.rew_buf[0]):.4}', end=' ')
-        # print()
-        # print('reward:', end=' ')
-        # for r in self.rew_buf:
-        #     print(f"{r.item()*1e5: 10.2f}", end=' ')
-        # print()
+
         return
 
     def _reset_envs(self, env_ids):
@@ -188,13 +184,11 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
         if(len(env_ids)>0):
             n = len(env_ids)
 
-            d = torch.rand(n).to("cuda")*6 + 2
-            theta = torch.rand(n).to("cuda")*torch.pi*2
-            x = torch.sin(theta)*d
-            y = torch.cos(theta)*d
+            x = torch.rand(n).to("cuda")*6 + 2
+            y = torch.rand(n).to("cuda")*6 + 2
             self._goal_position[env_ids, 0] = self._humanoid_root_states[env_ids, 0]+x
             self._goal_position[env_ids, 1] = self._humanoid_root_states[env_ids, 1]+y
-
+            
             self.reached_target[env_ids] = False
 
         return
@@ -233,15 +227,12 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
         return obs
 
     def _draw_task(self):
-
         point_color = np.array([[1.0, 0.0, 0.0]], dtype=np.float32)  # Red for goal position
-
         self.gym.clear_lines(self.viewer)
-
         goal_positions = self._goal_position.cpu().numpy()
-
         for i, env_ptr in enumerate(self.envs):
             # Draw goal position as a small line segment (point)
+            point_color = np.array([[0.0, 1.0, 0.0]], dtype=np.float32) if self.reached_target[i] else point_color
             goal_pos = goal_positions[i]
             goal_verts = np.array([goal_pos[0]-0.25, goal_pos[1]-0.25, 0.8, goal_pos[0] + 0.25, goal_pos[1] + 0.25, 0.8], dtype=np.float32)
             goal_verts = goal_verts.reshape([1, 6])
@@ -255,6 +246,17 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
     def get_num_amp_obs(self):
         return 323 + len(self.cfg["env"]["keyBodies"])*3 + 6  #0
     
+
+    # to calc the taskreward yry
+    def _compute_hoi_observations(self, env_ids=None):
+        super()._compute_hoi_observations(env_ids)  
+
+        if self.progress_buf[0] == 799:
+            succ = torch.sum(self.reached_target)/self.num_envs
+            print(f"Test env_num {self.num_envs}, Succ rate: {succ}")
+            # exit()
+        
+        return
 #####################################################################
 ###=========================jit functions=========================###
 #####################################################################

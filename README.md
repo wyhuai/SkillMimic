@@ -90,7 +90,7 @@ Run the following command.
 python skillmimic/run.py --test --task [HRLTaskName] --num_envs 16
 --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml
 --cfg_train skillmimic/data/cfg/train/rlg/[configFile]
---motion_file skillmimic/data/motions/BallPlay/[task]
+--motion_file skillmimic/data/motions/BallPlay-M/[task]
 --checkpoint skillmimic/data/models/[task]/nn/SkillMimic.pth
 --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```

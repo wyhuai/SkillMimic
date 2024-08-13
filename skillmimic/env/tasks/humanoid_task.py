@@ -111,7 +111,6 @@ class HumanoidWholeBody(BaseTask):
             self._init_camera()
 
         self._terminate_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long) # in  extras/info
-            
         return
 
     def _setup_character_props(self, key_bodies):
@@ -447,10 +446,14 @@ class HumanoidWholeBody(BaseTask):
     def render(self, sync_frame_time=False):
         if self.viewer:
             self._update_camera()
+            self._draw_task()
 
         super().render(sync_frame_time)
         return
 
+    def _draw_task(self):
+        return
+    
     def _build_key_body_ids_tensor(self, key_body_names):
         env_ptr = self.envs[0]
         actor_handle = self.humanoid_handles[0]

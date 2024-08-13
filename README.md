@@ -146,7 +146,7 @@ python skillmimic/run.py --test --task HRLScoringLayup --num_envs 1 --projtype M
 --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml \
 --motion_file skillmimic/data/motions/BallPlay-M/run \
 --checkpoint skillmimic/data/models/hlc_scoring/nn/SkillMimic.pth \
---llc_checkpoint skillmimic/data/models/mixedskills/nn/PhysHOI.pth
+--llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
 
 ### Training

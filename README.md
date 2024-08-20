@@ -163,7 +163,7 @@ Scoring:
 python skillmimic/run.py --task HRLScoringLayup --cfg_env skillmimic/data/cfg/skillmimic_hlc.yaml --cfg_train skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml --motion_file skillmimic/data/motions/BallPlay-M/run --llc_checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth --headless
 ```
 
-### The BallPlay dataset 🏀
+## The BallPlay dataset 🏀
 A subset is at `skillmimic/data/motions/BallPlay-M/`, full dataset coming soon.
 
 

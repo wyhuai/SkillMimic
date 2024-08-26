@@ -51,6 +51,8 @@ If you can see the pop-up interface, it means the installation is successful.
 
 However, if you encounter the message `ImportError: libpython3.*m.so.1.0: cannot open shared object ...`, don't worry. This is a common issue and can be easily resolved.
 
+You might take [this](https://github.com/google-deepmind/acme/issues/47 ) for your reference.
+
 
 ## Pre-Trained Models
 Pre-trained models are available at `skillmimic/data/models/`

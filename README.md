@@ -1,5 +1,5 @@
 # SkillMimic
-[Paper](https://ingrid789.github.io/SkillMimic/static/pdf/paper.pdf) | [Project Page](https://ingrid789.github.io/SkillMimic/) | [Video](https://youtu.be/j1smsXilUGM)
+[Paper](https://arxiv.org/abs/2408.15270) | [Project Page](https://ingrid789.github.io/SkillMimic/) | [Video](https://youtu.be/j1smsXilUGM)
 
 Official code release for the following paper:
 "**SkillMimic: Learning Reusable Basketball Skills from Demonstrations**"
@@ -175,7 +175,7 @@ If you find this repository useful for your research, please cite the following 
 @article{wang2024skillmimic,
 author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Lin, Jing and Luo, Zhengyi and Tsui, Hok Wai and Yu, Jiwen and Li, Xiu and Chen, Qifeng and Zhang, Jian and Zhang, Lei and Tan Ping},
   title     = {SkillMimic: Learning Reusable Basketball Skills from Demonstrations},
-  journal   = {arXiv preprint arXiv:000000000},
+  journal   = {arXiv preprint arXiv:2408.15270},
   year      = {2024},
 }
 ```

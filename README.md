@@ -169,7 +169,7 @@ python skillmimic/run.py --task HRLScoringLayup --cfg_env skillmimic/data/cfg/sk
 A subset is at `skillmimic/data/motions/BallPlay-M/`, full dataset coming soon.
 
 
-## References
+## References 🔗
 If you find this repository useful for your research, please cite the following work.
 ```
 @article{wang2024skillmimic,
@@ -179,9 +179,12 @@ author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Li
   year      = {2024},
 }
 ```
+
+## Acknowledgements 👏
 The code implementation is based on ASE and PhysHOI:
 - https://github.com/nv-tlabs/ASE
 - https://github.com/wyhuai/PhysHOI
 
-
-
+The rendering implementation is based on UniHSI:
+- https://github.com/OpenRobotLab/UniHSI
+- https://github.com/xizaoqu/blender_for_UniHSI

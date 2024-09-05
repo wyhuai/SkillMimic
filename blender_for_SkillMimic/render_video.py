@@ -1,5 +1,3 @@
-import sys
-sys.path.append(r"C:\Users\11400\appdata\roaming\python\python310\site-packages")
 import os
 import bpy
 import math

@@ -148,8 +148,9 @@ if __name__ == '__main__':
     motion_data = torch.load(motion_path)
 
     # Step1: get the joint mesh. If you have the mesh in folder "assets/skillmimic/body_mesh", you can skip this step.
-    # xml_file = "assets/skillmimic/skillmimic_humanoid_boxhand.xml"
-    # xml2mesh(xml_file)
+    xml_file = "assets/skillmimic/skillmimic_humanoid_boxhand.xml"
+    if not os.path.exists('assets/skillmimic/body_mesh'):
+        xml2mesh(xml_file)
     
     # Step2: process the .pt file into pickle file
     motion_data = {_: motion_data[_].to('cpu').numpy() for _ in motion_data}
@@ -157,14 +158,14 @@ if __name__ == '__main__':
         pickle.dump(motion_data, file)
 
     # Step3: process the body obj for each frame.
-    # outpath = "assets/skillmimic/"+task_name
-    # if not os.path.exists(outpath):
-    #     os.mkdir(outpath)
-    # rot = motion_data['dofrot']
-    # trans = motion_data['dofpos']
-    # for i in range(100):
-    #     build_body(rot[i], trans[i], i, outpath)
-    #     print(f'Successfully build body mesh for frame {i}!')
+    outpath = "assets/skillmimic/"+task_name
+    if not os.path.exists(outpath):
+        os.mkdir(outpath)
+    rot = motion_data['dofrot']
+    trans = motion_data['dofpos']
+    for i in range(len(rot)):
+        build_body(rot[i], trans[i], i, outpath)
+        print(f'Successfully build body mesh for frame {i}!')
 
 
 

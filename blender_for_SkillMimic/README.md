@@ -1,3 +1,7 @@
+## Requirements
+You can download the blender from [here](https://www.blender.org/download/). 
+Remember to download a Blender version lower than 4.0, as some functions are deprecated in higher versions.
+
 ## Render images for selected frame motion
 Step1: Get the body mesh for each frame & Get the motion file in pickle format
 ```

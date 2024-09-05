@@ -13,6 +13,8 @@ continuous scoring (green), which involves dribbling toward the basket, timing t
 
 - [ ] Release the complete raw BallPlay-M dataset and the data processing code.
 
+- [X] Release the rendering code for Blender.
+
 - [X] Release a subset of the BallPlay-M dataset.
 
 - [X] Release training and evaluation code.
@@ -95,7 +97,7 @@ python skillmimic/run.py --task SkillMimicBallPlay \
 - It is strongly encouraged to use large "--num_envs" when training on a large dataset, e.g., use "--num_envs 16384" for `--motion_file skillmimic/data/motions/skillset_1` (Meanwhile, `--minibatch_size` is recommended to be set as 8×`num_envs`)
 
 
-## High-Level Controller ⛹️‍♂️
+## High-Level Controller 🧠
 Once the skill policy is learned, we can train a high-level controller to reuse the learned skills to accomplish complex high-level tasks.
 
 ### Inference
@@ -180,7 +182,7 @@ author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Li
 }
 ```
 
-## Render 🎨
+## Rendering 🎨
 See the [folder](./blender_for_SkillMimic).
 
 ## Acknowledgements 👏

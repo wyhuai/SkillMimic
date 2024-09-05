@@ -22,3 +22,5 @@ python motionseq2mesh.py
 Step3: Copy the code from [render_video.py](./render_figure.py) into Blender.
  
 Step4: Adjust the parameters and camera settings in Blender to render the video.
+
+(Step5): You can import the [basketball stand file](./basketball_stand/file.FBX) for better rendering.

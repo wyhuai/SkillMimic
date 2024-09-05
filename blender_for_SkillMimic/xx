@@ -1,0 +1,18 @@
+Windows PowerShell
+版权所有（C） Microsoft Corporation。保留所有权利。
+
+安装最新的 PowerShell，了解新功能和改进！https://aka.ms/PSWindows
+
+PS C:\Users\11400> & "C:\Program Files\Blender Foundation\Blender 3.3\3.3\python\bin\python.EXE" -m ensurepip
+Defaulting to user installation because normal site-packages is not writeable
+Looking in links: c:\Users\11400\AppData\Local\Temp\tmpwapzaxto
+Requirement already satisfied: setuptools in c:\program files\blender foundation\blender 3.3\3.3\python\lib\site-packages (63.2.0)
+Requirement already satisfied: pip in c:\program files\blender foundation\blender 3.3\3.3\python\lib\site-packages (23.0.1)
+PS C:\Users\11400> & "C:\Program Files\Blender Foundation\Blender 3.3\3.3\python\bin\python.EXE" -m pip install scipy
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: scipy in c:\users\11400\appdata\roaming\python\python310\site-packages (1.14.1)
+Requirement already satisfied: numpy<2.3,>=1.23.5 in c:\users\11400\appdata\roaming\python\python310\site-packages (from scipy) (2.1.1)
+
+[notice] A new release of pip is available: 23.0.1 -> 24.2
+[notice] To update, run: C:\Program Files\Blender Foundation\Blender 3.3\3.3\python\bin\python.EXE -m pip install --upgrade pip
+PS C:\Users\11400>

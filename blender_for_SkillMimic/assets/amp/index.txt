@@ -1,0 +1,15 @@
+pelvis
+torso
+head
+right_upper_arm
+right_lower_arm
+right_hand
+left_upper_arm
+left_lower_arm
+left_hand
+right_thigh
+right_shin
+right_foot
+left_thigh
+left_shin
+left_foot

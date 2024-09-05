@@ -180,6 +180,9 @@ author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Li
 }
 ```
 
+## Render 🎨
+See the [folder](./blender_for_SkillMimic)
+
 ## Acknowledgements 👏
 The code implementation is based on ASE and PhysHOI:
 - https://github.com/nv-tlabs/ASE

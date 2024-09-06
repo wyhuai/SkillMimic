@@ -1,5 +1,5 @@
 ## Requirements
-You can download the blender from [here](https://www.blender.org/download/). 
+You can download the Blender from [here](https://www.blender.org/download/). 
 Remember to download a Blender version lower than 4.0, as some functions are deprecated in higher versions.
 
 ## Render images for selected frame motion

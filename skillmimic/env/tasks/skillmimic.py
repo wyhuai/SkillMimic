@@ -75,11 +75,11 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
     def post_physics_step(self):
         self._update_condition()
-
-        super().post_physics_step()
-
+        
         # extra calc of self._curr_obs, for imitation reward
         self._compute_hoi_observations()
+
+        super().post_physics_step()
 
         # self._compute_hoi_observations()
         self._update_hist_hoi_obs()

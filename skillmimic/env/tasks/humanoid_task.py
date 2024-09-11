@@ -157,9 +157,9 @@ class HumanoidWholeBody(BaseTask):
     def get_task_obs_size(self):
         return 0
 
-    def create_sim(self):
+    def _setup_scene(self):
         self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
-        self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
+        self.sim = super()._setup_scene(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))

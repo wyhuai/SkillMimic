@@ -7,6 +7,8 @@ import glob, os, random
 from isaacgym import gymtorch
 from isaacgym import gymapi
 from isaacgym.torch_utils import *
+import omni.isaac.lab.sim as sim_utils
+from omni.isaac.lab.assets import RigidObjectCfg
 
 from utils import torch_utils
 
@@ -78,6 +80,39 @@ class HumanoidWholeBodyWithObject(HumanoidWholeBody): #metric
         # asset_options.fix_base_link = True
 
         self._target_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
+        ball = RigidObjectCfg(
+            prim_path="/World/envs/env_.*/Ball",
+            spawn=sim_utils.UsdFileCfg(
+                usd_path=f"skillmimic/data/assets/urdf/ball.urdf",
+                rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                    rigid_body_enabled=True,
+                    angular_damping=0.01,
+                    linear_damping=0.01,
+                    #max_linear_velocity=1000.0,
+                    max_angular_velocity=100.0,
+                    #max_depenetration_velocity=100.0,
+                    #enable_gyroscopic_forces=True,
+                ),
+                mass_props=sim_utils.MassPropertiesCfg(density = self.ball_density), #The mass of the rigid body (in kg)., The density of the rigid body (in kg/m^3).
+                physics_material=sim_utils.RigidBodyMaterialCfg( # or maybe outside UsdFileCfg!!!!!!!!!!
+                    #static_friction=1.0, 
+                    #dynamic_friction=1.0,
+                    restitution=self.ball_restitution, 
+                )       
+            )
+            #init_state=ArticulationCfg.InitialStateCfg(
+            #    pos=(0.0, 0, 0.4),
+            #    rot=(0.1, 0.0, 0.0, 0.0),
+            #    joint_pos={
+            #        "door_left_joint": 0.0,
+            #        "door_right_joint": 0.0,
+            #        "drawer_bottom_joint": 0.0,
+            #        "drawer_top_joint": 0.0,
+            #    },
+            #),
+            
+ 
+        )
         return
     
     def _load_proj_asset(self):

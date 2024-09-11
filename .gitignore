@@ -1,8 +1,8 @@
 # README.md
 
 skillmimic/data/cfg/*
-!skillmimic/data/cfg/skillmimic.yaml
-!skillmimic/data/cfg/skillmimic_hlc.yaml
+skillmimic/data/cfg/skillmimic.yaml
+skillmimic/data/cfg/skillmimic_hlc.yaml
 
 !skillmimic/data/cfg/train/
 skillmimic/data/cfg/train/rlg/*

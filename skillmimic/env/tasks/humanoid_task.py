@@ -12,7 +12,7 @@ from isaacgym.torch_utils import *
 from utils import torch_utils
 
 from env.tasks.base_task import BaseTask
-
+from omni.isaac.lab.assets import Articulation
 
 PERTURB_OBJS = [
     ["small", 60],
@@ -158,13 +158,19 @@ class HumanoidWholeBody(BaseTask):
         return 0
 
     def _setup_scene(self):
+        self.actor = Articulation(self.cfg.robot)
+        self.scene.articulations["robot"] = self.actor
+
         self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
         self.sim = super()._setup_scene(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
-
-        self._create_ground_plane()
+        # add ground plane
+        spawn_ground_plane(prim_path="/World/ground", cfg=self.cfg.terrain)
+        #self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
         return
 
+
+    '''
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
         plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0)
@@ -173,6 +179,7 @@ class HumanoidWholeBody(BaseTask):
         plane_params.restitution = self.plane_restitution
         self.gym.add_ground(self.sim, plane_params)
         return
+    '''
     
     def _create_envs(self, num_envs, spacing, num_per_row):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
@@ -238,6 +245,9 @@ class HumanoidWholeBody(BaseTask):
             if dof_prop['lower'][j] > dof_prop['upper'][j]:
                 self.dof_limits_lower.append(dof_prop['upper'][j])
                 self.dof_limits_upper.append(dof_prop['lower'][j])
+                ############### try to print this out and see
+                self.dof_limits_lower.append(180)
+                self.dof_limits_upper.append(-180)                
             else:
                 self.dof_limits_lower.append(dof_prop['lower'][j])
                 self.dof_limits_upper.append(dof_prop['upper'][j])
@@ -249,7 +259,7 @@ class HumanoidWholeBody(BaseTask):
             self._build_pd_action_offset_scale()
 
         return
-    
+    '''
     def _build_env(self, env_id, env_ptr, humanoid_asset):
         col_group = env_id
         col_filter = self._get_humanoid_collision_filter()
@@ -277,7 +287,7 @@ class HumanoidWholeBody(BaseTask):
         self.humanoid_handles.append(humanoid_handle)
 
         return
-
+    '''
     def _build_pd_action_offset_scale(self):
         
         lim_low = self.dof_limits_lower.cpu().numpy()
@@ -352,15 +362,23 @@ class HumanoidWholeBody(BaseTask):
         self.actions = actions.to(self.device).clone()
         if (self._pd_control): #ZC99
             pd_tar = self._action_to_pd_targets(self.actions)
-            pd_tar_tensor = gymtorch.unwrap_tensor(pd_tar)
-            self.gym.set_dof_position_target_tensor(self.sim, pd_tar_tensor)
+            self.pd_tar_tensor = gymtorch.unwrap_tensor(pd_tar)
+            #self.gym.set_dof_position_target_tensor(self.sim, pd_tar_tensor)
         else:
-            forces = self.actions * self.motor_efforts.unsqueeze(0) * self.power_scale
-            force_tensor = gymtorch.unwrap_tensor(forces)
-            self.gym.set_dof_actuation_force_tensor(self.sim, force_tensor)
-
+            身身竹
+            self.forces = self.actions * self.motor_efforts.unsqueeze(0) * self.power_scale
+            #force_tensor = gymtorch.unwrap_tensor(forces)
+            #self.gym.set_dof_actuation_force_tensor(self.sim, force_tensor)
         return
     
+
+    def _apply_action(self):
+        if (self._pd_control): #ZC99
+            self.actor.set_joint_position_target(self.robot_dof_targets)
+        else:
+            self.actor.set_joint_effort_target(self.forces)
+
+                                    
     def _action_to_pd_targets(self, action):
         pd_tar = self._pd_action_offset + self._pd_action_scale * action
         return pd_tar

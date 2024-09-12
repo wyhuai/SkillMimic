@@ -2,7 +2,7 @@ from data.cfg import SkillmimicCfg
 from omni.isaac.lab.envs import DirectRLEnv
 import torch
 
-class FrankaCabinetEnv(DirectRLEnv):
+class BaseTask(DirectRLEnv):
     # pre-physics step calls
     #   |-- _pre_physics_step(action)
     #   |-- _apply_action()
@@ -18,7 +18,7 @@ class FrankaCabinetEnv(DirectRLEnv):
         super().__init__(cfg, render_mode, **kwargs)
 
     def __init__(self, cfg, enable_camera_sensors=False):
-        self.gym = gymapi.acquire_gym()
+        #self.gym = gymapi.acquire_gym()
 
         self.device_type = cfg.get("device_type", "cuda")
         self.device_id = cfg.get("device_id", 0)

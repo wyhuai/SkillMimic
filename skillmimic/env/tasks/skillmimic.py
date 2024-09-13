@@ -53,8 +53,10 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         self.hoi_data_batch = torch.zeros([self.num_envs, self.max_episode_length, self.ref_hoi_obs_size], device=self.device, dtype=torch.float)
         
-        
-        self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
+        # get the label of the skill
+        skill_number = int(os.listdir(self.motion_file)[0].split('_')[0])
+        self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(skill_number), num_classes=self.condition_size).repeat(self.num_envs,1).to(self.device)
+        # self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
 
         self._subscribe_events_for_change_condition()
 

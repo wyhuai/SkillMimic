@@ -218,10 +218,10 @@ def get_args(benchmark=False):
             "help": "Display the dataset"},
         {"name": "--init_vel", "action": "store_true", "default": False,
             "help": "Init the object velocity at the first frame"},
-        # {"name": "--save_images", "action": "store_true", "default": False,
-        #     "help": "save images for viewer"},
-        {"name": "--save_images", "type": str, "default": "",
-            "help": "save images for viewer"},
+        {"name": "--save_images", "action": "store_true", "default": False,
+            "help": "Save images for viewer"},
+        # {"name": "--save_images", "type": str, "default": "",
+        #     "help": "Save images for viewer"},
         {"name": "--num_envs", "type": int, "default": 0,
             "help": "Number of environments to create - override config file"},
         {"name": "--episode_length", "type": int, "default": 0,
@@ -255,7 +255,9 @@ def get_args(benchmark=False):
         {"name": "--resume_from", "type": str, "default": "", 
             "help": "Specify the checkpoint to continue training"},
         {"name": "--state_init", "type": str, "default": "Random", 
-            "help": "Specify a specific initialization frame and disable random initialization. Or Random Reference State Init"}
+            "help": "Specify a specific initialization frame and disable random initialization. Or Random Reference State Init"},
+        # {"name": "--playdataset", "action": "store_true", "default": False,
+        #     "help": "Set this flag to play the datase motion"}
     ]
 
     if benchmark:

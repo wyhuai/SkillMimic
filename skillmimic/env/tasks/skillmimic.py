@@ -7,6 +7,7 @@ import glob, os, random
 from isaacgym import gymtorch
 from isaacgym import gymapi
 from isaacgym.torch_utils import *
+from datetime import datetime
 
 from utils import torch_utils
 from utils.motion_data_handler import MotionDataHandler
@@ -29,6 +30,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.robot_type = cfg["env"]["asset"]["assetFileName"]
         self.reward_weights_default = cfg["env"]["rewardWeights"]
         self.save_images = cfg['env']['saveImages']
+        self.save_images_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.init_vel = cfg['env']['initVel']
         self.isTest = cfg['args'].test
 
@@ -374,9 +376,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
                 else:
                     frame_id = self.progress_buf[env_ids]
                 # dataname = self.motion_file[len('skillmimic/data/motions/mocap_0330/'):-7] #ZC8 #projectname
-                dataname = self.save_images #"test_images"
-                rgb_filename = "skillmimic/data/images/" + dataname + "/rgb_env%d_frame%05d.png" % (env_ids, frame_id)
-                os.makedirs("skillmimic/data/images/" + dataname, exist_ok=True)
+                # dataname = self.save_images #"test_images"
+                rgb_filename = "skillmimic/data/images/" + self.save_images_timestamp + "/rgb_env%d_frame%05d.png" % (env_ids, frame_id)
+                os.makedirs("skillmimic/data/images/" + self.save_images_timestamp, exist_ok=True)
                 self.gym.write_viewer_image_to_file(self.viewer,rgb_filename)
         return
     

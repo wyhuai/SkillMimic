@@ -256,8 +256,6 @@ def get_args(benchmark=False):
             "help": "Specify the checkpoint to continue training"},
         {"name": "--state_init", "type": str, "default": "Random", 
             "help": "Specify a specific initialization frame and disable random initialization. Or Random Reference State Init"},
-        # {"name": "--playdataset", "action": "store_true", "default": False,
-        #     "help": "Set this flag to play the datase motion"}
     ]
 
     if benchmark:

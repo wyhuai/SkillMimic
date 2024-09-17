@@ -58,9 +58,8 @@ class HumanoidWholeBody(BaseTask):
         # get gym GPU state tensors
         actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
-        rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim)
-        # sensor_tensor = self.gym.acquire_force_sensor_tensor(self.sim) #V1
-        # dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim) # Although the performance impact is usually quite small, it is best to only enable the sensors when needed.
+        #rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim) #position([0:3]), rotation([3:7]), linear velocity([7:10]), and angular velocity([10:13]).
+        #rigid_body_state = torch.cat((self.actor.body_pos_w, self.actor.body_quat_w, self.actor.body_lin_vel_w, self.actor.body_ang_vel_w),dim=-1)
         contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
         
         # sensors_per_env = 2
@@ -91,13 +90,17 @@ class HumanoidWholeBody(BaseTask):
         self.init_dof_pos = torch.zeros_like(self._dof_pos, device=self.device, dtype=torch.float)
         self.init_dof_pos_vel = torch.zeros_like(self._dof_vel, device=self.device, dtype=torch.float)
            
-        self._rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)
+        #self._rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)
         bodies_per_env = self._rigid_body_state.shape[0] // self.num_envs
-        rigid_body_state_reshaped = self._rigid_body_state.view(self.num_envs, bodies_per_env, 13)
-        self._rigid_body_pos = rigid_body_state_reshaped[..., :self.num_bodies, 0:3]
-        self._rigid_body_rot = rigid_body_state_reshaped[..., :self.num_bodies, 3:7]
-        self._rigid_body_vel = rigid_body_state_reshaped[..., :self.num_bodies, 7:10]
-        self._rigid_body_ang_vel = rigid_body_state_reshaped[..., :self.num_bodies, 10:13]
+        #rigid_body_state_reshaped = self._rigid_body_state.view(self.num_envs, bodies_per_env, 13)
+        #self._rigid_body_pos = rigid_body_state_reshaped[..., :self.num_bodies, 0:3]
+        #self._rigid_body_rot = rigid_body_state_reshaped[..., :self.num_bodies, 3:7]
+        #self._rigid_body_vel = rigid_body_state_reshaped[..., :self.num_bodies, 7:10]
+        #self._rigid_body_ang_vel = rigid_body_state_reshaped[..., :self.num_bodies, 10:13]
+        self._rigid_body_pos = self.actor.data.body_pos_w[..., :self.num_bodies, 0:3]
+        self._rigid_body_rot = self.actor.data.body_quat_w[..., :self.num_bodies, 3:7]
+        self._rigid_body_vel = self.actor.data.body_lin_vel_w[..., :self.num_bodies, 7:10]
+        self._rigid_body_ang_vel = self.actor.data.body_ang_vel_w[..., :self.num_bodies, 10:13]
 
         contact_force_tensor = gymtorch.wrap_tensor(contact_force_tensor)
         self._contact_forces = contact_force_tensor.view(self.num_envs, bodies_per_env, 3)[..., :self.num_bodies, :]
@@ -341,8 +344,6 @@ class HumanoidWholeBody(BaseTask):
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
-        # self.gym.refresh_force_sensor_tensor(self.sim)
-        # self.gym.refresh_dof_force_tensor(self.sim) 
         self.gym.refresh_net_contact_force_tensor(self.sim)
 
         return

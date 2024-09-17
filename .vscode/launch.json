@@ -1,0 +1,198 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // output/Humanoid_26-20-09-29/nn/Humanoid.pth v1, 1 day
+    // output/Humanoid_26-17-45-27/nn/Humanoid.pth v1, 2 hour
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "train",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "SkillMimicBallPlay", "--num_envs", "2048",
+                "--episode_length", "60",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", //#projectname
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
+                "--headless",
+                "--state_init", "10"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "0"
+            }
+        },
+        {
+            "name": "test",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--test", "--task", "SkillMimicBallPlay", "--num_envs", "1", 
+                "--episode_length", "800",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", 
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
+                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
+                //  "--play_dataset", "--episode_length", "200", 
+                // "--save_images", "test_images",
+                "--projtype", "Mouse",
+                "--state_init", "2",
+                "--checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
+                // "--headless"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1"
+            }
+        },
+        {
+            "name": "Training HRL Discrete Circling",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "HRLCircling", "--num_envs", "256",
+                "--episode_length", "800",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_circling.yaml",
+                "--rl_device",  "cuda:0",//"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
+                "--headless",
+                // "--resume_from", "output/SkillMimicCircling_08-02-59-47/nn/SkillMimicCircling.pth"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "1"
+            }
+        },
+        {
+            "name": "Training HRL Discrete Heading",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "HRLHeadingEasy", "--num_envs", "512",
+                "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml",
+                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--headless",
+                // "--resume_from", "output/SkillMimicHeading_08-02-59-54/nn/SkillMimicHeading.pth"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "2"
+            }
+        },
+        {
+            "name": "Training HRL Discrete HookShot",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "HRLHookshot", "--num_envs", "256",
+                "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
+                "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--headless",
+                // "--resume_from", "output/SkillMimicHookShot_08-03-01-43/nn/SkillMimicHookShot.pth"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "3"
+            }
+        },
+        {
+            "name": "Testing HRL Discrete HookShot",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [ "--task", "HRLHookshot", "--num_envs", "16",
+                "--test",
+                "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_hookshot.yaml",
+                "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--checkpoint", "output/SkillMimicHookShot_08-07-17-45-22/nn/SkillMimicHookShot.pth",
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "3"
+            }
+        },
+        {
+            "name": "Training HRL LayupScore",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "HRLScoringLayup", "--num_envs", "512",
+                "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml",
+                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--headless"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1"
+            }
+        },
+        {
+            "name": "Training PPO HookShot",
+            "type": "python",
+            "request": "launch",
+            "program": "skillmimic/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "HRLHookshot", "--num_envs", "512",
+                "--episode_length", "800",
+                "--rl_device", "cuda:0", //"cpu",
+                "--sim_device", "cuda:0", //"cpu",
+                "--pipeline", "gpu", //"cpu",
+                "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml",
+                "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
+                "--motion_file", "skillmimic/data/motions/turnhook", //007pickle_pick_001_001.pt
+                // "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
+                "--headless",
+                // "--resume_from", "output/SkillMimic_08-03-28-13/nn/SkillMimic.pth"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING":"1",
+                "CUDA_VISIBLE_DEVICES": "7"
+            }
+        },
+    ]
+}

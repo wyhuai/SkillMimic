@@ -1,0 +1,84 @@
+params:
+  seed: -1
+
+  algo:
+    name: hrl_discrete
+
+  model:
+    name: hrl_discrete
+
+  network:
+    name: hrl
+    separate: True
+
+    space:
+      discrete:
+        actions_num: 10  # Assume there are 10 discrete actions
+        logit_init:
+          name: glorot_uniform_initializer 
+          gain: 1.0
+          # name： uniform_initializer  # Assume uniform distribution is used as the initialization strategy
+          # min: -1.0
+          # max: 1.0
+
+    mlp:
+      units: [1024, 512]
+      activation: relu
+      d2rl: False
+
+      initializer:
+        name: default
+      regularizer:
+        name: None
+  
+  # load_path: "output/layup_target_no_reached_r/nn/PhysHOI.pth"
+
+  load_checkpoint: False
+
+  config:
+    name: SkillMimicHeading #Z0 Humanoid
+    env_name: rlgpu
+    multi_gpu: False
+    ppo: True
+    mixed_precision: False
+    normalize_input: True
+    normalize_value: True
+    reward_shaper:
+      scale_value: 1
+    normalize_advantage: True
+    gamma: 0.99
+    tau: 0.95
+    learning_rate: 2e-5
+    lr_schedule: constant
+    score_to_win: 20000
+    max_epochs: 2000
+    save_best_after: 10
+    save_frequency: 50
+    print_stats: True
+    grad_norm: 1.0
+    entropy_coef: 0.0
+    truncate_grads: False
+    ppo: True
+    e_clip: 0.2
+    horizon_length: 32
+    minibatch_size: 32768 #16384 #256 #Z0 64
+    mini_epochs: 6
+    critic_coef: 5
+    clip_value: False
+    seq_len: 4
+    bounds_loss_coef: 10
+    
+    task_reward_w: 1. #Z0 0.9
+    imit_reward_w: 0. #Z0 disc_ 0.1
+
+    # device: "cpu" #ZT9
+
+    llc_steps: 3 #ZC0 5
+    llc_config: skillmimic/data/cfg/train/rlg/skillmimic_as_llc.yaml #Z0 #projectname
+
+    delta_action: 0 #96 #ZC0 0
+
+    latent_dim: 3 #ZC0
+    control_mapping: [12,13,11]
+
+    resume_from: None

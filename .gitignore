@@ -1,0 +1,35 @@
+# README.md
+
+skillmimic/data/cfg/*
+!skillmimic/data/cfg/skillmimic.yaml
+!skillmimic/data/cfg/skillmimic_hlc.yaml
+
+!skillmimic/data/cfg/train/
+skillmimic/data/cfg/train/rlg/*
+!skillmimic/data/cfg/train/rlg/skillmimic.yaml
+!skillmimic/data/cfg/train/rlg/skillmimic_as_llc.yaml
+!skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_*.yaml
+skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_llcs.yaml
+
+
+/output/*
+/runs
+
+__pycache__/
+*.py[cod]
+
+# skillmimic/data/motions/*
+# !skillmimic/data/motions/BallPlay-M_0712/
+# skillmimic/data/motions/BallPlay-M_0712/pick
+# !skillmimic/data/motions/turnhook
+# skillmimic/data/models/*
+# !skillmimic/data/models/UAS-smooth
+!skillmimic/data/models/mixedskills
+
+skillmimic/env/tasks/ase.py
+skillmimic/env/tasks/hrl_circling.BAK.py
+skillmimic/env/tasks/skillmimic.BAK.py
+
+tt.ipynb
+
+skillmimic/data/images/

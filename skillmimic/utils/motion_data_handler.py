@@ -14,6 +14,7 @@ class MotionDataHandler:
         self.cfg = cfg
         self.init_vel = init_vel
         self.play_dataset = play_dataset #V1
+        self.max_episode_length = max_episode_length
         
         self.hoi_data_dict = {}
         self.hoi_data_label_batch = None
@@ -21,7 +22,6 @@ class MotionDataHandler:
         self.load_motion(motion_file)
 
         self.num_envs = num_envs
-        self.max_episode_length = max_episode_length
         self.envid2motid = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
         self.envid2episode_lengths = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
 
@@ -58,8 +58,9 @@ class MotionDataHandler:
                 layup_target_ind = torch.argmax(loaded_dict['obj_pos'][:, 2])
                 self.layup_target[i] = loaded_dict['obj_pos'][layup_target_ind]
                 self.root_target[i] = loaded_dict['root_pos'][layup_target_ind]
-
         self._compute_motion_weights(motion_class)
+        if self.play_dataset:
+            self.max_episode_length = self.motion_lengths.min() - 1
     
     def _sort_key(self, filename):
         match = re.search(r'\d+.pt$', filename)
@@ -118,7 +119,7 @@ class MotionDataHandler:
             loaded_dict['key_body_pos'],
             loaded_dict['contact']
         ), dim=-1)
-
+        
         return loaded_dict
 
     def _compute_velocity(self, positions, fps):
@@ -163,6 +164,8 @@ class MotionDataHandler:
             assert truncate_time >= 0
             motion_times = torch.min(motion_times, self.motion_lengths[motion_ids] - truncate_time)
 
+        if self.play_dataset:
+            motion_times = torch.ones((1), device=self.device, dtype=torch.int32)
         return motion_times
 
 
@@ -178,8 +181,7 @@ class MotionDataHandler:
         Tuple: A tuple containing the initial state
         """
         assert len(motion_ids) == len(env_ids)
-
-        valid_lengths = self.motion_lengths[motion_ids] - start_frames
+        valid_lengths = self.motion_lengths[motion_ids] - start_frames if not self.play_dataset else self.motion_lengths[motion_ids]
         self.envid2episode_lengths[env_ids] = torch.where(valid_lengths < self.max_episode_length,
                                     valid_lengths, self.max_episode_length)
 

@@ -8,6 +8,8 @@ import glob, os, random
 #from isaacgym import gymapi
 #from isaacgym.torch_utils import *
 
+from datetime import datetime
+
 from skill.SkillMimiclab.skillmimic.utils import torch_utils
 from skill.SkillMimiclab.skillmimic.utils.motion_data_handler import MotionDataHandler
 
@@ -29,6 +31,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self.robot_type = cfg["env"]["asset"]["assetFileName"]
         self.reward_weights_default = cfg["env"]["rewardWeights"]
         self.save_images = cfg['env']['saveImages']
+        self.save_images_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.init_vel = cfg['env']['initVel']
         self.isTest = cfg['args'].test
 
@@ -50,11 +53,11 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self._curr_obs = torch.zeros((self.num_envs, self.ref_hoi_obs_size), device=self.device, dtype=torch.float)
         self._hist_obs = torch.zeros((self.num_envs, self.ref_hoi_obs_size), device=self.device, dtype=torch.float)
         self._tar_pos = torch.zeros([self.num_envs, 3], device=self.device, dtype=torch.float)
-
-        self.hoi_data_batch = torch.zeros([self.num_envs, self.max_episode_length, self.ref_hoi_obs_size], device=self.device, dtype=torch.float)
         
-        
-        self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
+        # get the label of the skill
+        skill_number = int(os.listdir(self.motion_file)[0].split('_')[0])
+        self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(skill_number), num_classes=self.condition_size).repeat(self.num_envs,1).to(self.device)
+        # self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
 
         self._subscribe_events_for_change_condition()
 
@@ -160,8 +163,12 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
 
         self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
-                                            self.max_episode_length, self.reward_weights_default, self.init_vel)
-
+                                            self.max_episode_length, self.reward_weights_default, self.init_vel, self.play_dataset)
+        
+        if self.play_dataset:
+            self.max_episode_length = self._motion_data.max_episode_length
+        self.hoi_data_batch = torch.zeros([self.num_envs, self.max_episode_length, self.ref_hoi_obs_size], device=self.device, dtype=torch.float)
+        
         return
     
 
@@ -217,6 +224,8 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = self._motion_data.sample_time(motion_ids)
+
+        
 
         self.hoi_data_batch[env_ids], \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
@@ -363,18 +372,14 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         if self.viewer:
             self._draw_task()
-            
-            # if t%4==0:
+            self.play_dataset
             if self.save_images:
                 env_ids = 0
-                if self.play_dataset:
-                    frame_id = t
-                else:
-                    frame_id = self.progress_buf[env_ids]
+                frame_id = t if self.play_dataset else self.progress_buf[env_ids]
                 # dataname = self.motion_file[len('skillmimic/data/motions/mocap_0330/'):-7] #ZC8 #projectname
-                dataname = self.save_images #"test_images"
-                rgb_filename = "skillmimic/data/images/" + dataname + "/rgb_env%d_frame%05d.png" % (env_ids, frame_id)
-                os.makedirs("skillmimic/data/images/" + dataname, exist_ok=True)
+                # dataname = self.save_images #"test_images"
+                rgb_filename = "skillmimic/data/images/" + self.save_images_timestamp + "/rgb_env%d_frame%05d.png" % (env_ids, frame_id)
+                os.makedirs("skillmimic/data/images/" + self.save_images_timestamp, exist_ok=True)
                 self.gym.write_viewer_image_to_file(self.viewer,rgb_filename)
         return
     

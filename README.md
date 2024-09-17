@@ -71,6 +71,7 @@ python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 \
 --motion_file skillmimic/data/motions/BallPlay-M/layup \
 --checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
 ```
+- If your computer has more than 1 GPU, add `DRI_PRIME=1` before the above command, otherwise you may encounter display issues.
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:
 `Q: pick up`, `W: shot`, `←: dribble left`, `↑: dribble forward`, `→: dribble right`, `E: layup`, `R: turnaround layup`.
 - You may change `--motion_file` to alter the initialization, or add `--state_init frame_number` to initialize from a specific reference state (Default: random reference state initialization).

@@ -12,9 +12,9 @@ class BaseTask(DirectRLEnv):
     #   |-- _reset_idx(env_ids)
     #   |-- _get_observations()
 
-    cfg: SkillmimicCfg
+    cfg: SkillmimiceEnvCfg
 
-    def __init__(self, cfg: SkillmimicCfg, render_mode: str | None = None, **kwargs):
+    def __init__(self, cfg: SkillmimiceEnvCfg, render_mode: str | None = None, **kwargs):
         super().__init__(cfg, render_mode, **kwargs)
 
     def __init__(self, cfg, enable_camera_sensors=False):

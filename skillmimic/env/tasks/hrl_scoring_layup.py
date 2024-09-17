@@ -31,12 +31,12 @@ from torch import Tensor
 from typing import Tuple
 from enum import Enum
 
-from utils import torch_utils
-from utils.motion_data_handler import MotionDataHandler
+from skill.SkillMimiclab.skillmimic.utils import torch_utils
+from skill.SkillMimiclab.skillmimic.utils.motion_data_handler import MotionDataHandler
 
-from isaacgym import gymapi
-from isaacgym import gymtorch
-from isaacgym.torch_utils import *
+#from isaacgym import gymapi
+#from isaacgym import gymtorch
+#from isaacgym.torch_utils import *
 
 from env.tasks.humanoid_object_task import HumanoidWholeBodyWithObject
 

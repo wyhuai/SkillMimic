@@ -4,12 +4,12 @@ import torch
 from torch import Tensor
 from typing import Tuple
 import glob, os, random
-from isaacgym import gymtorch
-from isaacgym import gymapi
-from isaacgym.torch_utils import *
+#from isaacgym import gymtorch
+#from isaacgym import gymapi
+#from isaacgym.torch_utils import *
 
-from utils import torch_utils
-from utils.motion_data_handler import MotionDataHandler
+from skill.SkillMimiclab.skillmimic.utils import torch_utils
+from skill.SkillMimiclab.skillmimic.utils.motion_data_handler import MotionDataHandler
 
 from env.tasks.humanoid_object_task import HumanoidWholeBodyWithObject
 

@@ -30,12 +30,13 @@ import os
 import sys
 import yaml
 
-from isaacgym import gymapi
-from isaacgym import gymutil
+#from isaacgym import gymapi
+#from isaacgym import gymutil
 
 import numpy as np
 import random
 import torch
+import argparse
 
 SIM_TIMESTEP = 1.0 / 60.0
 
@@ -267,13 +268,26 @@ def get_args(benchmark=False):
                               {"name": "--bench_file", "action": "store", "help": "Filename to store benchmark results"}]
 
     # parse arguments
-    args = gymutil.parse_arguments(
-        description="RL Policy",
-        custom_parameters=custom_parameters)
+    parser = argparse.ArgumentParser(description="RL Policy")
+    # Add arguments from custom_parameters list
+    for param in custom_parameters:
+        # Extract the name and remove it from the dictionary for easier argument addition
+        name = param.pop("name")
+        parser.add_argument(name, **param)
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Example of accessing the parsed arguments
+    print(args)
+
+    #args = gymutil.parse_arguments(
+    #    description="RL Policy",
+    #    custom_parameters=custom_parameters)
 
     # allignment with examples
-    args.device_id = args.compute_device_id
-    args.device = args.sim_device_type if args.use_gpu_pipeline else 'cpu'
+    #args.device_id = args.compute_device_id
+    #args.device = args.sim_device_type if args.use_gpu_pipeline else 'cpu'
 
     if args.test:
         args.play = args.test

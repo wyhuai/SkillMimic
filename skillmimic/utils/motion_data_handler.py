@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 import re
-from utils import torch_utils
+from skill.SkillMimiclab.skillmimic.utils import torch_utils
 
 class MotionDataHandler:
     def __init__(self, motion_file, device, key_body_ids, cfg, num_envs, max_episode_length, reward_weights_default, 

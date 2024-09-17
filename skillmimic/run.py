@@ -25,12 +25,33 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import argparse
+
+from omni.isaac.lab.app import AppLauncher
+
+# add argparse arguments
+parser = argparse.ArgumentParser(description="Pick and lift state machine for cabinet environments.")
+parser.add_argument(
+    "--disable_fabric", action="store_true", default=False, help="Disable fabric and use USD I/O operations."
+)
+parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
+# append AppLauncher cli args
+AppLauncher.add_app_launcher_args(parser)
+# parse the arguments
+args_cli = parser.parse_args()
+
+# launch omniverse app
+app_launcher = AppLauncher(headless=args_cli.headless)
+simulation_app = app_launcher.app
 
 import os
+cwd = os.getcwd()
+print(cwd)
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
-from utils.config import set_np_formatting, set_seed, get_args, parse_sim_params, load_cfg
-from utils.parse_task import parse_task
+#later just put isacclab under skillmimic
+from skill.SkillMimiclab.skillmimic.utils.config import set_np_formatting, set_seed, get_args, parse_sim_params, load_cfg
+from skill.SkillMimiclab.skillmimic.utils.parse_task import parse_task
 
 from rl_games.algos_torch import players
 from rl_games.algos_torch import torch_ext

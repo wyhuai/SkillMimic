@@ -34,7 +34,7 @@ from env.tasks.hrl_heading_easy import HRLHeadingEasy
 from env.tasks.hrl_throwing import HRLThrowing
 from env.tasks.hrl_scoring_layup import HRLScoringLayup
 
-from isaacgym import rlgpu
+#from isaacgym import rlgpu
 
 import json
 import numpy as np
@@ -66,6 +66,6 @@ def parse_task(args, cfg, cfg_train, sim_params):
         print(e)
         warn_task_name()
     #env = VecTaskPythonWrapper(task, rl_device, cfg_train.get("clip_observations", np.inf), cfg_train.get("clip_actions", 1.0))
-    env = DirectRLEnvCfg(task, rl_device, cfg_train.get("clip_observations", np.inf), cfg_train.get("clip_actions", 1.0))
+    env = DirectRLEnvCfg(SkillmimicCfg, render_mode = None, **kwargs)
 
     return task, env

@@ -32,7 +32,7 @@ from rl_games.common import a2c_common
 from rl_games.common import schedulers
 from rl_games.common import vecenv
 
-from isaacgym.torch_utils import *
+#from isaacgym.torch_utils import *
 
 import time
 from datetime import datetime

@@ -5,11 +5,11 @@ from torch import Tensor
 from typing import Tuple
 import glob, os, random
 
-from isaacgym import gymtorch
-from isaacgym import gymapi
-from isaacgym.torch_utils import *
+#from isaacgym import gymtorch
+#from isaacgym import gymapi
+#from isaacgym.torch_utils import *
 
-from utils import torch_utils
+from skill.SkillMimiclab.skillmimic.utils import torch_utils
 
 from env.tasks.base_task import BaseTask
 from omni.isaac.lab.assets import Articulation
@@ -58,9 +58,8 @@ class HumanoidWholeBody(BaseTask):
         # get gym GPU state tensors
         actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
-        rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim)
-        # sensor_tensor = self.gym.acquire_force_sensor_tensor(self.sim) #V1
-        # dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim) # Although the performance impact is usually quite small, it is best to only enable the sensors when needed.
+        #rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim) #position([0:3]), rotation([3:7]), linear velocity([7:10]), and angular velocity([10:13]).
+        #rigid_body_state = torch.cat((self.actor.body_pos_w, self.actor.body_quat_w, self.actor.body_lin_vel_w, self.actor.body_ang_vel_w),dim=-1)
         contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
         
         # sensors_per_env = 2
@@ -91,13 +90,17 @@ class HumanoidWholeBody(BaseTask):
         self.init_dof_pos = torch.zeros_like(self._dof_pos, device=self.device, dtype=torch.float)
         self.init_dof_pos_vel = torch.zeros_like(self._dof_vel, device=self.device, dtype=torch.float)
            
-        self._rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)
+        #self._rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)
         bodies_per_env = self._rigid_body_state.shape[0] // self.num_envs
-        rigid_body_state_reshaped = self._rigid_body_state.view(self.num_envs, bodies_per_env, 13)
-        self._rigid_body_pos = rigid_body_state_reshaped[..., :self.num_bodies, 0:3]
-        self._rigid_body_rot = rigid_body_state_reshaped[..., :self.num_bodies, 3:7]
-        self._rigid_body_vel = rigid_body_state_reshaped[..., :self.num_bodies, 7:10]
-        self._rigid_body_ang_vel = rigid_body_state_reshaped[..., :self.num_bodies, 10:13]
+        #rigid_body_state_reshaped = self._rigid_body_state.view(self.num_envs, bodies_per_env, 13)
+        #self._rigid_body_pos = rigid_body_state_reshaped[..., :self.num_bodies, 0:3]
+        #self._rigid_body_rot = rigid_body_state_reshaped[..., :self.num_bodies, 3:7]
+        #self._rigid_body_vel = rigid_body_state_reshaped[..., :self.num_bodies, 7:10]
+        #self._rigid_body_ang_vel = rigid_body_state_reshaped[..., :self.num_bodies, 10:13]
+        self._rigid_body_pos = self.actor.data.body_pos_w[..., :self.num_bodies, 0:3]
+        self._rigid_body_rot = self.actor.data.body_quat_w[..., :self.num_bodies, 3:7]
+        self._rigid_body_vel = self.actor.data.body_lin_vel_w[..., :self.num_bodies, 7:10]
+        self._rigid_body_ang_vel = self.actor.data.body_ang_vel_w[..., :self.num_bodies, 10:13]
 
         contact_force_tensor = gymtorch.wrap_tensor(contact_force_tensor)
         self._contact_forces = contact_force_tensor.view(self.num_envs, bodies_per_env, 3)[..., :self.num_bodies, :]
@@ -341,8 +344,6 @@ class HumanoidWholeBody(BaseTask):
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
-        # self.gym.refresh_force_sensor_tensor(self.sim)
-        # self.gym.refresh_dof_force_tensor(self.sim) 
         self.gym.refresh_net_contact_force_tensor(self.sim)
 
         return
@@ -550,6 +551,43 @@ class HumanoidWholeBody(BaseTask):
 ###=========================jit functions=========================###
 #####################################################################
 
+################################################
+@torch.jit.script
+def quat_rotate(q, v):
+    shape = q.shape
+    q_w = q[:, -1]
+    q_vec = q[:, :3]
+    a = v * (2.0 * q_w ** 2 - 1.0).unsqueeze(-1)
+    b = torch.cross(q_vec, v, dim=-1) * q_w.unsqueeze(-1) * 2.0
+    c = q_vec * \
+        torch.bmm(q_vec.view(shape[0], 1, 3), v.view(
+            shape[0], 3, 1)).squeeze(-1) * 2.0
+    return a + b + c
+
+@torch.jit.script
+def quat_mul(a, b):
+    assert a.shape == b.shape
+    shape = a.shape
+    a = a.reshape(-1, 4)
+    b = b.reshape(-1, 4)
+
+    x1, y1, z1, w1 = a[:, 0], a[:, 1], a[:, 2], a[:, 3]
+    x2, y2, z2, w2 = b[:, 0], b[:, 1], b[:, 2], b[:, 3]
+    ww = (z1 + x1) * (x2 + y2)
+    yy = (w1 - y1) * (w2 + z2)
+    zz = (w1 + y1) * (w2 - z2)
+    xx = ww + yy + zz
+    qq = 0.5 * (xx + (z1 - x1) * (x2 - y2))
+    w = qq - ww + (z1 - y1) * (y2 - z2)
+    x = qq - xx + (x1 + w1) * (x2 + w2)
+    y = qq - yy + (w1 - x1) * (y2 + z2)
+    z = qq - zz + (z1 + y1) * (w2 - x2)
+
+    quat = torch.stack([x, y, z, w], dim=-1).view(shape)
+
+    return quat
+###############################################
+
 @torch.jit.script
 def compute_humanoid_reward(obs_buf):
     # type: (Tensor) -> Tensor
@@ -604,7 +642,6 @@ def compute_humanoid_observations(body_pos, body_rot, body_vel, body_ang_vel, lo
     obs = torch.cat((root_h_obs, local_body_pos, local_body_rot_obs, local_body_vel, local_body_ang_vel, body_contact_buf), dim=-1)
     return obs
 
-
 @torch.jit.script
 def compute_humanoid_reset(reset_buf, progress_buf, rigid_body_pos,
                            max_episode_length, enable_early_termination, termination_heights):
@@ -622,3 +659,6 @@ def compute_humanoid_reset(reset_buf, progress_buf, rigid_body_pos,
     reset = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(reset_buf), terminated)
 
     return reset, terminated
+
+
+

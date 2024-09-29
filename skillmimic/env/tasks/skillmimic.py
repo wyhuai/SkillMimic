@@ -1,6 +1,7 @@
 from enum import Enum
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torch import Tensor
 from typing import Tuple
 import glob, os, random
@@ -53,10 +54,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self._hist_obs = torch.zeros((self.num_envs, self.ref_hoi_obs_size), device=self.device, dtype=torch.float)
         self._tar_pos = torch.zeros([self.num_envs, 3], device=self.device, dtype=torch.float)
         
-        # get the label of the skill
-        skill_number = int(os.listdir(self.motion_file)[0].split('_')[0])
-        self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(skill_number), num_classes=self.condition_size).repeat(self.num_envs,1).to(self.device)
-        # self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
+        # skill_number = int(os.listdir(self.motion_file)[0].split('_')[0])
+        # self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(skill_number), num_classes=self.condition_size).repeat(self.num_envs,1).to(self.device)
+        self.hoi_data_label_batch = torch.zeros([self.num_envs, self.condition_size], device=self.device, dtype=torch.float)
 
         self._subscribe_events_for_change_condition()
 
@@ -224,7 +224,8 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = self._motion_data.sample_time(motion_ids)
 
-        
+        skill_label = self._motion_data.motion_class[motion_ids]
+        self.hoi_data_label_batch[env_ids] = F.one_hot(torch.tensor(skill_label, device=self.device), num_classes=self.condition_size).float()
 
         self.hoi_data_batch[env_ids], \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
@@ -239,6 +240,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         motion_ids = self._motion_data.sample_motions(num_envs)
         motion_times = torch.full(motion_ids.shape, self._state_init, device=self.device, dtype=torch.int)
+
+        skill_label = self._motion_data.motion_class[motion_ids]
+        self.hoi_data_label_batch[env_ids] = F.one_hot(torch.tensor(skill_label, device=self.device), num_classes=self.condition_size).float()
 
         self.hoi_data_batch[env_ids], \
         self.init_root_pos[env_ids], self.init_root_rot[env_ids],  self.init_root_pos_vel[env_ids], self.init_root_rot_vel[env_ids], \
@@ -277,8 +281,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     def _update_condition(self):
         for evt in self.evts:
             if evt.action.isdigit() and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action)).to("cuda"), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
-            
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action), device=self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                print(evt.action)
+
     def play_dataset_step(self, time): #Z12
 
         t = time

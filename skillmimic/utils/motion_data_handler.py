@@ -44,7 +44,7 @@ class MotionDataHandler:
         all_seqs = glob.glob(motion_file + '/*.pt')
         self.num_motions = len(all_seqs)
         self.motion_lengths = torch.zeros(len(all_seqs), device=self.device, dtype=torch.long)
-        motion_class = np.zeros(len(all_seqs), dtype=int)
+        self.motion_class = np.zeros(len(all_seqs), dtype=int)
         self.layup_target = torch.zeros((len(all_seqs), 3), device=self.device, dtype=torch.float)
         self.root_target = torch.zeros((len(all_seqs), 3), device=self.device, dtype=torch.float)
 
@@ -53,12 +53,12 @@ class MotionDataHandler:
             loaded_dict = self._process_sequence(seq_path)
             self.hoi_data_dict[i] = loaded_dict
             self.motion_lengths[i] = loaded_dict['hoi_data'].shape[0]
-            motion_class[i] = int(loaded_dict['hoi_data_text'])
+            self.motion_class[i] = int(loaded_dict['hoi_data_text'])
             if self.skill_name in ['layup', "SHOT_up"]:
                 layup_target_ind = torch.argmax(loaded_dict['obj_pos'][:, 2])
                 self.layup_target[i] = loaded_dict['obj_pos'][layup_target_ind]
                 self.root_target[i] = loaded_dict['root_pos'][layup_target_ind]
-        self._compute_motion_weights(motion_class)
+        self._compute_motion_weights(self.motion_class)
         if self.play_dataset:
             self.max_episode_length = self.motion_lengths.min() - 1
     
@@ -139,7 +139,7 @@ class MotionDataHandler:
 
     def _compute_motion_weights(self, motion_class):
         unique_classes, counts = np.unique(motion_class, return_counts=True)
-        class_to_index = {k: v for v, k in enumerate(unique_classes)}
+        class_to_index = {cls: idx for idx, cls in enumerate(unique_classes)}
         class_weights = 1 / counts
         indexed_classes = np.array([class_to_index[int(cls)] for cls in motion_class], dtype=int)
         self._motion_weights = class_weights[indexed_classes]

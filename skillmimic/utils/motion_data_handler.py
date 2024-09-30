@@ -40,8 +40,8 @@ class MotionDataHandler:
         self.reward_weights["orv"] = (torch.ones((self.num_envs), device=self.device, dtype=torch.float)*self.reward_weights_default["orv"])
 
     def load_motion(self, motion_file):
-        self.skill_name = motion_file.split('/')[-1]
-        all_seqs = glob.glob(motion_file + '/*.pt')
+        self.skill_name = os.path.basename(motion_file) #motion_file.split('/')[-1] #metric
+        all_seqs = all_seqs = glob.glob(os.path.join(motion_file, '**', '*.pt'), recursive=True) #glob.glob(motion_file + '/*.pt')
         self.num_motions = len(all_seqs)
         self.motion_lengths = torch.zeros(len(all_seqs), device=self.device, dtype=torch.long)
         self.motion_class = np.zeros(len(all_seqs), dtype=int)
@@ -54,7 +54,7 @@ class MotionDataHandler:
             self.hoi_data_dict[i] = loaded_dict
             self.motion_lengths[i] = loaded_dict['hoi_data'].shape[0]
             self.motion_class[i] = int(loaded_dict['hoi_data_text'])
-            if self.skill_name in ['layup', "SHOT_up"]:
+            if self.skill_name in ['layup', "SHOT_up"]: #metric
                 layup_target_ind = torch.argmax(loaded_dict['obj_pos'][:, 2])
                 self.layup_target[i] = loaded_dict['obj_pos'][layup_target_ind]
                 self.root_target[i] = loaded_dict['root_pos'][layup_target_ind]

@@ -94,7 +94,7 @@ class HRLHeadingEasy(HumanoidWholeBodyWithObject):
         return obs_size
 
     def _load_motion(self, motion_file):
-        self.skill_name = motion_file.split('/')[-1] #metric
+        self.skill_name = os.path.basename(motion_file) #motion_file.split('/')[-1] #metric
         self.max_episode_length = 800
         if self.cfg["env"]["episodeLength"] > 0:
             self.max_episode_length =  self.cfg["env"]["episodeLength"]

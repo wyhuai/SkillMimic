@@ -13,7 +13,9 @@
             "program": "skillmimic/run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": ["--task", "SkillMimicBallPlay", "--num_envs", "2048",
+            "args": ["--task", "SkillMimicBallPlay", 
+                "--num_envs", "2048",
+                // "--num_envs", "16384", "--minibatch_size", "131072",
                 "--episode_length", "60",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", //#projectname
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
@@ -24,11 +26,11 @@
                 // "skillmimic/data/motions/Data-BallPlay2_less",
                 "skillmimic/data/motions/BallPlay-M/run",
                 "--headless",
-                "--state_init", "10"
+                // "--state_init", "10"
             ],
             "env": {
                 "CUDA_LAUNCH_BLOCKING":"1",
-                "CUDA_VISIBLE_DEVICES": "0"
+                "CUDA_VISIBLE_DEVICES": "1"
             }
         },
         {

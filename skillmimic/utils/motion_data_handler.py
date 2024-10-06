@@ -61,6 +61,7 @@ class MotionDataHandler:
         self._compute_motion_weights(self.motion_class)
         if self.play_dataset:
             self.max_episode_length = self.motion_lengths.min() - 1
+        print(f"--------Having loaded {len(all_seqs)} motions--------")
     
     def _sort_key(self, filename):
         match = re.search(r'\d+.pt$', filename)
@@ -141,6 +142,8 @@ class MotionDataHandler:
         unique_classes, counts = np.unique(motion_class, return_counts=True)
         class_to_index = {cls: idx for idx, cls in enumerate(unique_classes)}
         class_weights = 1 / counts
+        if 1 in class_to_index: # raise sampling probs of skill pick
+            class_weights[class_to_index[1]]*=2
         indexed_classes = np.array([class_to_index[int(cls)] for cls in motion_class], dtype=int)
         self._motion_weights = class_weights[indexed_classes]
 

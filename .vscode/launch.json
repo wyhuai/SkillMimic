@@ -20,7 +20,9 @@
                 "--rl_device", "cuda:0", //"cpu",
                 "--sim_device", "cuda:0", //"cpu",
                 "--pipeline", "gpu", //"cpu",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
+                "--motion_file", 
+                // "skillmimic/data/motions/Data-BallPlay2_less",
+                "skillmimic/data/motions/BallPlay-M/run",
                 "--headless",
                 "--state_init", "10"
             ],
@@ -40,12 +42,15 @@
                 "--episode_length", "800",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic.yaml", 
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/skillmimic.yaml",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run",
+                "--motion_file", 
+                // "skillmimic/data/motions/Data-BallPlay2_less",
+                "skillmimic/data/motions/BallPlay-M/run",
                 //  "--play_dataset", "--episode_length", "200", 
                 // "--save_images", "test_images",
                 "--projtype", "Mouse",
                 "--state_init", "2",
-                "--checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
+                "--checkpoint", "skillmimic/data/models/SkillMimic_11-14-15-45-DB2less_scratch_r14/nn/SkillMimic.pth"
+                // "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
                 // "--headless"
             ],
             "env": {
@@ -66,7 +71,7 @@
                 "--rl_device",  "cuda:0",//"cpu",
                 "--sim_device", "cuda:0", //"cpu",
                 "--pipeline", "gpu", //"cpu",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--motion_file", "skillmimic/data/motions/BallPlay-M/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth",
                 "--headless",
                 // "--resume_from", "output/SkillMimicCircling_08-02-59-47/nn/SkillMimicCircling.pth"
@@ -90,7 +95,7 @@
                 "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_heading.yaml",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--motion_file", "skillmimic/data/motions/BallPlay-M/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 "--headless",
                 // "--resume_from", "output/SkillMimicHeading_08-02-59-54/nn/SkillMimicHeading.pth"
@@ -162,7 +167,7 @@
                 "--pipeline", "gpu", //"cpu",
                 "--cfg_env", "skillmimic/data/cfg/skillmimic_hlc.yaml",
                 "--cfg_train", "skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_layupscore.yaml",
-                "--motion_file", "skillmimic/data/motions/BallPlay-M_0712/run", //007pickle_pick_001_001.pt
+                "--motion_file", "skillmimic/data/motions/BallPlay-M/run", //007pickle_pick_001_001.pt
                 "--llc_checkpoint", "skillmimic/data/models/UAS-smooth/nn/PhysHOI.pth", 
                 "--headless"
             ],

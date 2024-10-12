@@ -455,3 +455,35 @@ class SkillMimicAgent(common_agent.CommonAgent):
         self.writer.add_scalar('info/clip_frac', torch_ext.mean_list(train_info['actor_clip_frac']).item(), frame)
         self.writer.add_scalar('info/kl', torch_ext.mean_list(train_info['kl']).item(), frame)
         return
+    
+    def _actor_loss(self, old_action_log_probs_batch, action_log_probs, advantage, curr_e_clip):
+        # Convert all input tensors to torch.float64
+        old_action_log_probs_batch = old_action_log_probs_batch.to(torch.float64)
+        action_log_probs = action_log_probs.to(torch.float64)
+        advantage = advantage.to(torch.float64)
+        curr_e_clip = float(curr_e_clip)  # Ensure curr_e_clip is a float
+
+        # Check the range of old_action_log_probs_batch - action_log_probs
+        diff = old_action_log_probs_batch - action_log_probs
+        # max_diff = diff.max().item()
+        # min_diff = diff.min().item()
+
+        # Clip diff to prevent exponent overflow
+        diff_clipped = torch.clamp(diff, -20, 20)
+
+        # Calculate the ratio and loss
+        ratio = torch.exp(diff_clipped)
+        surr1 = advantage * ratio
+        surr2 = advantage * torch.clamp(ratio, 1.0 - curr_e_clip, 1.0 + curr_e_clip)
+        a_loss = torch.max(-surr1, -surr2)
+
+        # Check if clipped
+        clipped = torch.abs(ratio - 1.0) > curr_e_clip
+        clipped = clipped.detach()
+        
+        info = {
+            'actor_loss': a_loss,
+            'actor_clipped': clipped
+        }
+
+        return info

@@ -182,6 +182,10 @@ class CommonAgent(a2c_continuous.A2CAgent):
                     print('MAX EPOCHS NUM!')
                     return self.last_mean_rewards, epoch_num
 
+                if epoch_num % (5000) == 0: #self.max_epochs // 4
+                    self.save(f"{model_output_file}_e{epoch_num}")
+                    print(f'Checkpoint saved at epoch {epoch_num}')
+                    
                 update_time = 0
         return
 

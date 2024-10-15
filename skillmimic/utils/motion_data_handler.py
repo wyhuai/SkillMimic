@@ -104,7 +104,8 @@ class MotionDataHandler:
         loaded_dict['obj_rot'] = -loaded_dict['hoi_data'][:, 321+6:324+6].clone()
         loaded_dict['obj_rot_vel'] = self._compute_velocity(loaded_dict['obj_rot'], fps_data)
         if self.init_vel:
-            loaded_dict['obj_pos_vel'] = torch.cat((loaded_dict['obj_pos_vel'][:1],loaded_dict['obj_pos_vel']),dim=0)
+            loaded_dict['obj_pos_vel'][0] = loaded_dict['obj_pos_vel'][1]
+            # loaded_dict['obj_pos_vel'] = torch.cat((loaded_dict['obj_pos_vel'][:1],loaded_dict['obj_pos_vel']),dim=0)
         loaded_dict['obj_rot'] = torch_utils.exp_map_to_quat(-loaded_dict['hoi_data'][:, 327:330]).clone()
 
         loaded_dict['contact'] = torch.round(loaded_dict['hoi_data'][:, 330+6:331+6].clone())

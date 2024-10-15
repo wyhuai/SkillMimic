@@ -74,6 +74,10 @@ class MotionDataHandler:
         loaded_dict['hoi_data'] = hoi_data.detach().to(self.device)
         data_frames_scale = self.cfg["env"]["dataFramesScale"]
         fps_data = self.cfg["env"]["dataFPS"] * data_frames_scale
+        # step_intervel = int( 1. / self.cfg["env"]["dataFramesScale"] ) 
+        #Z This value is needed for subsequent slicing operations, 
+        # e.g. loaded_dict['root_pos'] = loaded_dict['hoi_data'][::step_intervel, 0:3].clone()
+        # but can be omitted for now since it is currently 1.
 
         loaded_dict['root_pos'] = loaded_dict['hoi_data'][:, 0:3].clone()
         loaded_dict['root_pos_vel'] = self._compute_velocity(loaded_dict['root_pos'], fps_data)

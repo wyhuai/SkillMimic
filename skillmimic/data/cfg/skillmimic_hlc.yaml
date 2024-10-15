@@ -15,8 +15,8 @@ env:
   controlFrequencyInv: 1 # 60 Hz #ZC
   stateInit: 2 #Random
   hybridInitProb: 0.5
-  dataFPS: 120 #ZC
-  dataFramesScale: .5 # 120 -> 60 fps
+  dataFPS: 60 #120 #ZC
+  dataFramesScale: 1. #.5 # 120 -> 60 fps
   ballSize: 1.
   ballRestitution: 0.81
   ballDensity: 1000.

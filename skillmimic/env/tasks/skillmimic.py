@@ -60,7 +60,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
 
         self._subscribe_events_for_change_condition()
 
-        self.envid2motid = torch.zeros(self.num_envs, device=self.device, dtype=torch.long) #{}
+        # self.envid2motid = torch.zeros(self.num_envs, device=self.device, dtype=torch.long) #{}
         # self.envid2episode_lengths = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
 
         self.show_motion_test = False
@@ -164,8 +164,9 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
         self._motion_data = MotionDataHandler(motion_file, self.device, self._key_body_ids, self.cfg, self.num_envs, 
                                             self.max_episode_length, self.reward_weights_default, self.init_vel, self.play_dataset)
         
-        if self.play_dataset:
-            self.max_episode_length = self._motion_data.max_episode_length
+        # if self.play_dataset:
+        #     self.max_episode_length = self._motion_data.max_episode_length
+        #     print("--------------------------------------------", self.max_episode_length)
         self.hoi_data_batch = torch.zeros([self.num_envs, self.max_episode_length, self.ref_hoi_obs_size], device=self.device, dtype=torch.float)
         
         return
@@ -287,18 +288,20 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     def play_dataset_step(self, time): #Z12
 
         t = time
+        # print(t, self._motion_data.envid2motid)
 
         for env_id, env_ptr in enumerate(self.envs):
             # t += self.envid2idt[env_id]
+            motid = self._motion_data.envid2motid[env_id].item()
+            t = t % self._motion_data.motion_lengths[motid]
 
             ### update object ###
-            motid = self.envid2motid[env_id].item()
             self._target_states[env_id, :3] = self._motion_data.hoi_data_dict[motid]['obj_pos'][t,:]
             self._target_states[env_id, 3:7] = self._motion_data.hoi_data_dict[motid]['obj_rot'][t,:]
             self._target_states[env_id, 7:10] = torch.zeros_like(self._target_states[env_id, 7:10])
             self._target_states[env_id, 10:13] = torch.zeros_like(self._target_states[env_id, 10:13])
 
-            ### update subject ###   
+            ### update subject ###
             _humanoid_root_pos = self._motion_data.hoi_data_dict[motid]['root_pos'][t,:].clone()
             _humanoid_root_rot = self._motion_data.hoi_data_dict[motid]['root_rot'][t,:].clone()
             self._humanoid_root_states[env_id, 0:3] = _humanoid_root_pos

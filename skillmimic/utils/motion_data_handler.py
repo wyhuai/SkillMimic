@@ -41,7 +41,8 @@ class MotionDataHandler:
 
     def load_motion(self, motion_file):
         self.skill_name = os.path.basename(motion_file) #motion_file.split('/')[-1] #metric
-        all_seqs = all_seqs = glob.glob(os.path.join(motion_file, '**', '*.pt'), recursive=True) #glob.glob(motion_file + '/*.pt')
+        all_seqs = [motion_file] if os.path.isfile(motion_file) \
+            else glob.glob(os.path.join(motion_file, '**', '*.pt'), recursive=True) #glob.glob(motion_file + '/*.pt')
         self.num_motions = len(all_seqs)
         self.motion_lengths = torch.zeros(len(all_seqs), device=self.device, dtype=torch.long)
         self.motion_class = np.zeros(len(all_seqs), dtype=int)
@@ -59,8 +60,8 @@ class MotionDataHandler:
                 self.layup_target[i] = loaded_dict['obj_pos'][layup_target_ind]
                 self.root_target[i] = loaded_dict['root_pos'][layup_target_ind]
         self._compute_motion_weights(self.motion_class)
-        if self.play_dataset:
-            self.max_episode_length = self.motion_lengths.min() - 1
+        # if self.play_dataset:
+        #     self.max_episode_length = self.motion_lengths.min()
         print(f"--------Having loaded {len(all_seqs)} motions--------")
     
     def _sort_key(self, filename):
@@ -85,14 +86,14 @@ class MotionDataHandler:
         loaded_dict['root_rot_3d'] = loaded_dict['hoi_data'][:, 3:6].clone()
         loaded_dict['root_rot'] = torch_utils.exp_map_to_quat(loaded_dict['root_rot_3d']).clone()
         self.smooth_quat_seq(loaded_dict['root_rot'])
-
         q_diff = torch_utils.quat_multiply(
             torch_utils.quat_conjugate(loaded_dict['root_rot'][:-1, :].clone()), 
             loaded_dict['root_rot'][1:, :].clone()
         )
         angle, axis = torch_utils.quat_to_angle_axis(q_diff)
         exp_map = torch_utils.angle_axis_to_exp_map(angle, axis)
-        loaded_dict['root_rot_vel'] = self._compute_velocity(exp_map, fps_data)
+        loaded_dict['root_rot_vel'] = exp_map*fps_data
+        loaded_dict['root_rot_vel'] = torch.cat((torch.zeros((1, loaded_dict['root_rot_vel'].shape[-1])).to(self.device),loaded_dict['root_rot_vel']),dim=0)
 
         loaded_dict['dof_pos'] = loaded_dict['hoi_data'][:, 9:9+156].clone()
         loaded_dict['dof_pos_vel'] = self._compute_velocity(loaded_dict['dof_pos'], fps_data)
@@ -173,7 +174,7 @@ class MotionDataHandler:
             motion_times = torch.min(motion_times, self.motion_lengths[motion_ids] - truncate_time)
 
         if self.play_dataset:
-            motion_times = torch.ones((1), device=self.device, dtype=torch.int32)
+            motion_times = torch.zeros((self.num_envs), device=self.device, dtype=torch.int32)
         return motion_times
 
 
@@ -189,7 +190,7 @@ class MotionDataHandler:
         Tuple: A tuple containing the initial state
         """
         assert len(motion_ids) == len(env_ids)
-        valid_lengths = self.motion_lengths[motion_ids] - start_frames if not self.play_dataset else self.motion_lengths[motion_ids]
+        valid_lengths = self.motion_lengths[motion_ids] - start_frames # if not self.play_dataset else self.motion_lengths[motion_ids]
         self.envid2episode_lengths[env_ids] = torch.where(valid_lengths < self.max_episode_length,
                                     valid_lengths, self.max_episode_length)
 
@@ -268,7 +269,7 @@ class MotionDataHandler:
             "init_obj_pos": (torch.rand(3, device=self.device) * 10 - 5),
             "init_obj_pos_vel": torch.rand(3, device=self.device) * 5,
             "init_obj_rot": torch.rand(4, device=self.device),
-            "init_obj_rot_vel": torch.rand(4, device=self.device) * 0.1
+            "init_obj_rot_vel": torch.rand(3, device=self.device) * 0.1
         }
 
     def _get_general_case_initial_state(self, motion_id, start_frame, episode_length):

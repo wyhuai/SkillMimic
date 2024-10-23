@@ -6,14 +6,17 @@ skillmimic/data/cfg/*
 
 !skillmimic/data/cfg/train/
 skillmimic/data/cfg/train/rlg/*
-!skillmimic/data/cfg/train/rlg/skillmimic.yaml
-!skillmimic/data/cfg/train/rlg/skillmimic_as_llc.yaml
+!skillmimic/data/cfg/train/rlg/skillmimic*.yaml
+# !skillmimic/data/cfg/train/rlg/skillmimic.yaml
+# !skillmimic/data/cfg/train/rlg/skillmimic_as_llc.yaml
+
 !skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_*.yaml
 skillmimic/data/cfg/train/rlg/hrl_humanoid_discrete_llcs.yaml
 
 
 /output/*
 /runs
+/tb_logs
 /IsaacGym_Preview_4_Package.tar.gz
 
 __pycache__/
@@ -21,6 +24,7 @@ __pycache__/
 
 skillmimic/data/motions/*
 !skillmimic/data/motions/BallPlay-M/
+!skillmimic/data/motions/mocap_0330_labeled
 # skillmimic/data/motions/BallPlay-M_0712/pick
 # !skillmimic/data/motions/turnhook
 

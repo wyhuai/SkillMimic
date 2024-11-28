@@ -282,7 +282,7 @@ class SkillMimicBallPlay(HumanoidWholeBodyWithObject):
     def _update_condition(self):
         for evt in self.evts:
             if evt.action.isdigit() and evt.value > 0:
-                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action), device=self.device), num_classes=self.condition_size).repeat(self.hoi_data_label_batch.shape[0],1)
+                self.hoi_data_label_batch = torch.nn.functional.one_hot(torch.tensor(int(evt.action), device=self.device), num_classes=self.condition_size).float().repeat(self.hoi_data_label_batch.shape[0],1)
                 print(evt.action)
 
     def play_dataset_step(self, time): #Z12

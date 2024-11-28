@@ -37,7 +37,7 @@ params:
   load_checkpoint: False
 
   config:
-    name: PhysHOI
+    name: SkillMimic
     env_name: rlgpu
     multi_gpu: False
     ppo: True

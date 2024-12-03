@@ -69,7 +69,9 @@ python skillmimic/run.py --test --task SkillMimicBallPlay --num_envs 16 \
 --cfg_env skillmimic/data/cfg/skillmimic.yaml \
 --cfg_train skillmimic/data/cfg/train/rlg/skillmimic.yaml \
 --motion_file skillmimic/data/motions/BallPlay-M/layup \
---checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth
+--checkpoint skillmimic/data/models/mixedskills/nn/skillmimic_llc.pth \
+--state_init 20 \
+--episode_length 140
 ```
 - If your computer has more than 1 GPU, add `DRI_PRIME=1` before the above command, otherwise you may encounter display issues.
 - You may control the skill switching using your keyboard. By default, the key and skill correspondence are as follows:

@@ -2,7 +2,7 @@
 [Paper](https://arxiv.org/abs/2408.15270) | [Project Page](https://ingrid789.github.io/SkillMimic/) | [Video](https://youtu.be/j1smsXilUGM)
 
 Official code release for the following paper:
-"**SkillMimic: Learning Reusable Basketball Skills from Demonstrations**"
+"**SkillMimic: Learning Basketball Interaction Skills from Demonstrations**"
 
 ![image](https://github.com/user-attachments/assets/ac75c9be-f144-4b6d-980f-272c6f657627)
 We propose a novel approach that enables physically simulated humanoids to learn a variety of basketball skills purely from human demonstrations, such as

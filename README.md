@@ -188,10 +188,16 @@ author    = {Wang, Yinhuai and Zhao, Qihan and Yu, Runyi and Zeng, Ailing and Li
 ## Rendering 🎨
 See the [folder](./blender_for_SkillMimic).
 
+
+## Our works on HOI Imitation Learning 👏
+[PhysHOI](https://github.com/wyhuai/PhysHOI):Physics-Based Imitation of Dynamic Human-Object Interaction
+
+[SkillMimic-V2](https://github.com/Ingrid789/SkillMimic-V2): Learning Robust and Generalizable Interaction Skills from Sparse and Noisy Demonstrations
+
+
 ## Acknowledgements 👏
 The code implementation is based on ASE and PhysHOI:
 - https://github.com/nv-tlabs/ASE
-- https://github.com/wyhuai/PhysHOI
 
 The rendering implementation is based on UniHSI:
 - https://github.com/OpenRobotLab/UniHSI
